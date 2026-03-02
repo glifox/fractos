@@ -1,0 +1,16 @@
+{
+  "name": "fractos",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "loro-crdt": "^1.10.6",
+    "uuid": "^13.0.0"
+  }
+}
