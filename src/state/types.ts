@@ -1,7 +1,7 @@
 
 export enum Types {
-  PROJECT = "project",
-  TASK = "task",
+  PROJECT = "Project",
+  TASK = "Task",
 }
 
 export type ProjectData = {

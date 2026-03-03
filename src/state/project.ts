@@ -1,13 +1,11 @@
-import { LoroText, type LoroTree, type LoroTreeNode, type TreeID } from "loro-crdt";
-import { Types, type ProjectData, type TaskData } from "./types";
-import { Task } from "./tasks";
+import { type LoroTreeNode } from "loro-crdt";
+import { Types, type ProjectData } from "./types";
+import { Node } from "./tasks";
 
 
-export class Project {
-  get type() { return this.node.data.get("type") as Types };
-  get parent() { return this.node.parent() };
-  
-  private constructor(public node: LoroTreeNode) {
+export class Project extends Node {  
+  private constructor(node: LoroTreeNode) {
+    super(node);
     if (this.parent) throw Error(`A project can not have a parent`);
     if (this.type !== Types.PROJECT) throw Error(`this node is of type: ${this.type}`);
   }
@@ -21,19 +19,15 @@ export class Project {
   static new(node: LoroTreeNode, project: ProjectData): Project {
     node.data.set("type", Types.PROJECT);
     node.data.set("title", project.title);
-    
-    const description = new LoroText();
-    description.insert(0, project.description);
-    
-    node.data.setContainer("description", description);
+    node.data.set("description", project.description);
     
     return new Project(node);
   }
   
-  createTask(data: TaskData, parent?: LoroTreeNode): TreeID {
-    const node = parent?.createNode() || this.node.createNode();
-    const task = Task.new(node, data);
-    
-    return task.id;
+  get metadata(): ProjectData {
+    return {
+      title: this.node.data.get("title") as string,
+      description: this.node.data.get("description") as string,
+    }
   }
 }
