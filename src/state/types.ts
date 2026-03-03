@@ -10,9 +10,19 @@ export type ProjectData = {
   description: string,
 };
 
+const default_project_data: ProjectData = {
+  title: "error",
+  description: "error",
+}
+
 export function populateProject(node: LoroTreeNode, data: ProjectData) {
-  node.data.set("title", data.title);
-  node.data.set("description", data.description);
+  for (const key of Object.keys(default_project_data)) {
+    // @ts-ignore
+    let value = data[key] || default_project_data[key];
+    
+    if (value == undefined) continue;
+    node.data.set(key,  value);
+  }
 }
 
 export type TaskData = {
@@ -21,8 +31,18 @@ export type TaskData = {
   percentage?: number,
 }
 
+const default_task_data: TaskData = {
+  title: "error",
+  description: "error",
+  percentage: 0,
+}
+
 export function populateTask(node: LoroTreeNode, data: TaskData) {  
-  node.data.set("title", data.title);
-  node.data.set("percentage", data.percentage! || 0);
-  node.data.set("description", data.description);
+  for (const key of Object.keys(default_task_data)) {
+    // @ts-ignore
+    let value = data[key] || default_task_data[key];
+    
+    if (value == undefined) continue;
+    node.data.set(key,  value);
+  }
 }

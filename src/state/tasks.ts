@@ -10,7 +10,7 @@ export class Node {
   
   constructor(public node: LoroTreeNode) { }
   
-  private get _percentage() { return this.node.data.get("percentage") as number };
+  protected get _percentage() { return this.node.data.get("percentage") as number };
   percentage(callback: (child: TreeID, percentage: number) => void = () => { }): number {
     const children = this.children;
     const length = this.children.length;
@@ -91,5 +91,12 @@ export class Task extends Node {
       title: this.node.data.get("title") as string,
       description: this.node.data.get("description") as string,
     }
+  }
+  
+  done() { this.node.data.set("percentage", 100) }
+  undone() { this.node.data.set("percentage", 0) }
+  toggle() {
+    if (this._percentage < 100) this.undone();
+    else this.done();
   }
 }
