@@ -37,3 +37,13 @@ pr.percentage((id, per) => {
   percentages[id] = per;
   change(ed, { percentages })
 })
+
+const data = last.metadata;
+data.percentage = 100;
+last.update({ task: data })
+
+const new_percentages: any = {}
+pr.percentage((id, per) => {
+  new_percentages[id] = per;
+  change(ed, { percentages, new: { json: doc.toJSON(), new_percentages } })
+})
