@@ -1,4 +1,4 @@
-import { Types, type TaskData } from "./types";
+import { populateProject, populateTask, Types, type ProjectData, type TaskData } from "./types";
 import { type LoroTreeNode, type TreeID } from "loro-crdt";
 
 
@@ -49,8 +49,21 @@ export class Node {
     return records[this.type];
   }
   
-  createTask(data: TaskData): Task {
-    return Task.new(this.node.createNode(), data);
+  createTask(data: TaskData): Task { return Task.new(this.node.createNode(), data); }
+  update(data: { project?: ProjectData, task?: TaskData }): boolean {
+    const records: Record<Types, () => boolean> = {
+      [Types.PROJECT]: () => { 
+        if (!data.project) return false;
+        populateProject(this.node, data.project);
+        return true;
+      },
+      [Types.TASK]: () => { 
+        if (!data.task) return false;
+        populateTask(this.node, data.task);
+        return true;
+      },
+    }
+    return records[this.type]();
   }
 }
 
@@ -69,10 +82,7 @@ export class Task extends Node {
   static from(node: LoroTreeNode): Task { return new Task(node) }
   static new(node: LoroTreeNode, task: TaskData): Task {
     node.data.set("type", Types.TASK);
-    node.data.set("title", task.title);
-    node.data.set("percentage", task.percentage! || 0);
-    node.data.set("description", task.description);
-    
+    populateTask(node, task);
     return new Task(node);
   }
   

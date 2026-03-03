@@ -32,4 +32,6 @@ export class State {
     
     return Task.from(node.node);
   }
+  
+  delete(target: TreeID) { this.tree.delete(target); }
 }

@@ -1,5 +1,5 @@
 import { type LoroTreeNode } from "loro-crdt";
-import { Types, type ProjectData } from "./types";
+import { populateProject, Types, type ProjectData } from "./types";
 import { Node } from "./tasks";
 
 
@@ -18,9 +18,7 @@ export class Project extends Node {
   static from(node: LoroTreeNode): Project { return new Project(node) }
   static new(node: LoroTreeNode, project: ProjectData): Project {
     node.data.set("type", Types.PROJECT);
-    node.data.set("title", project.title);
-    node.data.set("description", project.description);
-    
+    populateProject(node, project);
     return new Project(node);
   }
   
