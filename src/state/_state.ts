@@ -34,4 +34,11 @@ export class State {
   }
   
   delete(target: TreeID) { this.tree.delete(target); }
+  move(target: TreeID, parent?: TreeID, index?: number) {
+    if (this.getNode(target)?.type !== Types.PROJECT && !target) {
+      throw Error(`Only the ${Types.PROJECT}s can be orphans`);
+    }
+    
+    this.tree.move(target, target, index)
+  }
 }
