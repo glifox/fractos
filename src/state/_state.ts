@@ -1,4 +1,4 @@
-import type { LoroTree, TreeID } from "loro-crdt";
+import type { LoroTree, Subscription, TreeID } from "loro-crdt";
 import { Project } from "./project";
 import { Types, type ProjectData } from "./types";
 import { Task, Node } from "./tasks";
@@ -40,5 +40,9 @@ export class State {
     }
     
     this.tree.move(target, target, index)
+  }
+  
+  subscribe(listener: () => void): Subscription {
+    return this.tree.subscribe(listener);
   }
 }
