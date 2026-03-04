@@ -19,8 +19,6 @@ export function populateProject(node: LoroTreeNode, data: ProjectData) {
   for (const key of Object.keys(default_project_data)) {
     // @ts-ignore
     let value = data[key] || default_project_data[key];
-    
-    if (value == undefined) continue;
     node.data.set(key,  value);
   }
 }
@@ -41,8 +39,6 @@ export function populateTask(node: LoroTreeNode, data: TaskData) {
   for (const key of Object.keys(default_task_data)) {
     // @ts-ignore
     let value = data[key] || default_task_data[key];
-    
-    if (value == undefined) continue;
     node.data.set(key,  value);
   }
 }
