@@ -2,7 +2,7 @@ import { populateProject, populateTask, Types, type ProjectData, type TaskData }
 import { type LoroTreeNode, type TreeID } from "loro-crdt";
 
 
-export class Node {
+export class FractosNode {
   get id(): TreeID { return this.node.id };
   get type() { return this.node.data.get("type") as Types };
   get parent() { return this.node.parent() };
@@ -24,7 +24,7 @@ export class Node {
     
     let sum = 0;
     for (const child of children) {
-      const node = new Node(child);
+      const node = new FractosNode(child);
       sum += node.percentage(callback);
     }
     
@@ -67,7 +67,7 @@ export class Node {
   }
 }
 
-export class Task extends Node {
+export class Task extends FractosNode {
   private constructor(node: LoroTreeNode) {
     super(node)
     if (!this.parent) throw Error(`A task can not be orphan`);

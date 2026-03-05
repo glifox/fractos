@@ -42,3 +42,10 @@ export function populateTask(node: LoroTreeNode, data: TaskData) {
     node.data.set(key,  value);
   }
 }
+
+export type Metadata = {
+  [K in keyof TaskData | keyof ProjectData]?: 
+    K extends keyof TaskData ? TaskData[K] : 
+    K extends keyof ProjectData ? ProjectData[K] : 
+    never;
+};

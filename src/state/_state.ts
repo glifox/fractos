@@ -1,7 +1,7 @@
-import type { LoroTree, Subscription, TreeID } from "loro-crdt";
+import type { Listener, LoroTree, Subscription, TreeDiff, TreeID } from "loro-crdt";
 import { Project } from "./project";
 import { Types, type ProjectData } from "./types";
-import { Task, Node } from "./tasks";
+import { Task, FractosNode } from "./tasks";
 
 
 export class State {
@@ -10,11 +10,11 @@ export class State {
   newProject(project: ProjectData): Project { return Project.new(this.tree.createNode(), project) }
   getNodeById(target: TreeID) { return this.tree.getNodeByID(target) }
   
-  getNode(target: TreeID): Node | undefined {
+  getNode(target: TreeID): FractosNode | undefined {
     const node = this.getNodeById(target);
     if (!node) return undefined;
     
-    return new Node(node);
+    return new FractosNode(node);
   }
   
   getProject(target: TreeID): Project | undefined {
@@ -42,7 +42,7 @@ export class State {
     this.tree.move(target, target, index)
   }
   
-  subscribe(listener: () => void): Subscription {
+  subscribe(listener: Listener): Subscription {
     return this.tree.subscribe(listener);
   }
 }

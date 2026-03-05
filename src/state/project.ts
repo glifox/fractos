@@ -1,9 +1,9 @@
 import { type LoroTreeNode } from "loro-crdt";
 import { populateProject, Types, type ProjectData } from "./types";
-import { Node } from "./tasks";
+import { FractosNode } from "./tasks";
 
 
-export class Project extends Node {  
+export class Project extends FractosNode {  
   private constructor(node: LoroTreeNode) {
     super(node);
     if (this.parent) throw Error(`A project can not have a parent`);
