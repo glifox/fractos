@@ -4,6 +4,7 @@ import { Project } from "../src/state/project";
 import type { EditorView } from "codemirror";
 import { State } from "../src/state/_state";
 import { View } from "../src/view/_view";
+import { Debuger } from "./rederer";
 const log = (obj: Object) => { return Editor(JSON.stringify(obj, null, 2)) }
 const change = (editor: EditorView, obj: Object) => {
   editor.dispatch({ changes: { from: 0, insert: JSON.stringify(obj, null, 2), to: ed.state.doc.length }})
@@ -13,7 +14,7 @@ const doc = new LoroDoc()
 
 const tree = doc.getTree("root");
 const state = new State(tree);
-const view = new View(state);
+const view = new View(state, new Debuger(log([])));
 
 const pr = Project.new(tree.createNode(), {
   title: "Project name",

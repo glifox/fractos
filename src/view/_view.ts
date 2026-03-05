@@ -3,36 +3,8 @@ import { State } from "../state/_state";
 import { Task, type FractosNode } from "../state/tasks";
 import { Project } from "../state/project";
 import { Types, type Metadata } from "../state/types";
+import { SimpleRenderer, type Renderer } from "./renderer";
 
-
-export interface Renderer {
-  createTask(node: Task): HTMLElement,
-  createProject(node: Project): HTMLElement,
-  
-  update(id: TreeID, metadata: Metadata): void,
-  delete(id: TreeID): void,
-  
-  // reorderChilds(id: TreeID): HTMLElement,
-  move(target: TreeID, parent?: TreeID): void,
-}
-
-class FractosRenderer implements Renderer {
-  createTask(node: Task): HTMLElement {
-    throw new Error("Method not implemented.");
-  }
-  createProject(node: Project): HTMLElement {
-    throw new Error("Method not implemented.");
-  }
-  update(id: TreeID, metadata: Metadata): void {
-    throw new Error("Method not implemented.");
-  }
-  delete(id: TreeID): void {
-    throw new Error("Method not implemented.");
-  }
-  move(target: TreeID, parent?: TreeID): void {
-    throw new Error("Method not implemented.");
-  }
-}
 
 export class View {
   subcription: Subscription;
@@ -44,23 +16,45 @@ export class View {
     renderer?: Renderer,
     project?: TreeID
   ) {
-    this.renderer = (renderer) ? renderer : new FractosRenderer();
+    this.renderer = (renderer) ? renderer : new SimpleRenderer();
     if (project) this.selected = project;
     
     this.subcription = this.state.subscribe(this.on_change.bind(this))
   }
   
-  private on_change(event: LoroEventBatch) {
-    console.info(event)
-    const events = event.events;
+  private *dedupe(events: LoroEvent[]) {
+    const creation: Set<TreeID> = new Set();
     
+    console.table( events);
     for (const event of events) {
-      requestAnimationFrame(() => {
+      if (event.diff.type === "tree") {
+        for (const treediff of event.diff.diff) {
+          if (treediff.action === "create") {
+            creation.add(treediff.target)
+          }
+        }
+        yield event
+      }
+      else
+      if (
+        event.diff.type === "map" &&
+        !creation.has(event.path[1] as TreeID)
+      ) {
+        yield event
+      }
+    }
+  }
+  
+  private on_change(event: LoroEventBatch) {
+    const events = this.dedupe(event.events);
+    
+    requestAnimationFrame(() => {
+      for (const event of events) {
         if (event.diff.type === "tree") this.updateTree(event.diff.diff)
         else
         if (event.diff.type === "map") this.updateElement(event)
-      })
-    }
+      }
+    })
   }
   private get create(): Record<Types, (node: LoroTreeNode) => HTMLElement> {
     return {
@@ -75,12 +69,15 @@ export class View {
   private updateTree(items: TreeDiffItem[]) {
     // const fragmento = document.createDocumentFragment();
     
+    
+    
     for (const item of items) {
       const actions = {
         create: (item: TreeDiffItem) => { 
           const node = this.state.getNode(item.target);
           if (!node) return;
           
+          // todo: Control de creacion, si ya existe o no esta visible no enviar la solicitud de crear 
           this.create[node.type](node.node)
         },
         delete: (item: TreeDiffItem) => {  },
@@ -94,7 +91,7 @@ export class View {
   private updateElement(item: LoroEvent) {
     const id = item.path[1] as TreeID;
     const changes = (item.diff as MapDiff).updated;
-    console.table( changes);
+    this.renderer.update(id, changes);
   }
   
   private delete(node: TreeID) {
