@@ -1,8 +1,8 @@
 import type { LoroEvent, LoroEventBatch, LoroTreeNode, MapDiff, Subscription, TreeDiff, TreeDiffItem, TreeID } from "loro-crdt";
 import { State } from "../state/_state";
-import { Task, type FractosNode } from "../state/tasks";
+import { Task } from "../state/tasks";
 import { Project } from "../state/project";
-import { Types, type Metadata } from "../state/types";
+import { Types } from "../state/types";
 import { SimpleRenderer, type Renderer } from "./renderer";
 
 
@@ -59,17 +59,21 @@ export class View {
   private get create(): Record<Types, (node: LoroTreeNode) => HTMLElement> {
     return {
       [Types.PROJECT]: (node) => {
-        return this.renderer.createProject(Project.from(node))
+        const project = Project.from(node);
+        return this.renderer.createProject({ target: project.id, ... project.metadata })
       },
       [Types.TASK]: (node) => {
-        return this.renderer.createTask(Task.from(node))
+        const task = Task.from(node);
+        return this.renderer.createTask({
+          target: task.id,
+          parent: task.parent!.id,
+          ... task.metadata
+        })
       }
     }
   }
   private updateTree(items: TreeDiffItem[]) {
     // const fragmento = document.createDocumentFragment();
-    
-    
     
     for (const item of items) {
       const actions = {

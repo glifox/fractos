@@ -1,11 +1,20 @@
 import type { TreeID } from "loro-crdt";
 import type { Project } from "../state/project";
 import type { Task } from "../state/tasks";
-import type { Metadata } from "../state/types";
+import type { Metadata, ProjectData, TaskData } from "../state/types";
+
+type TaskElement = TaskData & {
+  target: TreeID,
+  parent: TreeID,
+}
+
+type ProjectElement = ProjectData & {
+  target: TreeID
+}
 
 export interface Renderer {
-  createTask(node: Task): HTMLElement,
-  createProject(node: Project): HTMLElement,
+  createTask(element: TaskElement): HTMLElement,
+  createProject(element: ProjectElement): HTMLElement,
   
   update(id: TreeID, metadata: Metadata): void,
   delete(id: TreeID): void,
@@ -15,10 +24,10 @@ export interface Renderer {
 }
 
 export class SimpleRenderer implements Renderer {
-  createTask(node: Task): HTMLElement {
+  createTask(element: TaskElement): HTMLElement {
     throw new Error("Method not implemented.");
   }
-  createProject(node: Project): HTMLElement {
+  createProject(element: ProjectElement): HTMLElement {
     throw new Error("Method not implemented.");
   }
   update(id: TreeID, metadata: Metadata): void {
@@ -30,4 +39,5 @@ export class SimpleRenderer implements Renderer {
   move(target: TreeID, parent?: TreeID): void {
     throw new Error("Method not implemented.");
   }
+  
 }
