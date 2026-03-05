@@ -14,12 +14,17 @@ const doc = new LoroDoc()
 
 const tree = doc.getTree("root");
 const state = new State(tree);
-const view = new View(state, new Debuger(log([])));
-
 const pr = Project.new(tree.createNode(), {
   title: "Project name",
   description: "Description"
-})
+});
+
+const view = new View(
+  state,
+  new Debuger(log([])),
+  pr.id,
+);
+
 doc.commit();
 
 const last = pr.createTask({

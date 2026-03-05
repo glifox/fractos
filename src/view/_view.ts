@@ -2,13 +2,13 @@ import type { LoroEvent, LoroEventBatch, LoroTreeNode, MapDiff, Subscription, Tr
 import { State } from "../state/_state";
 import { Task } from "../state/tasks";
 import { Project } from "../state/project";
-import { Types } from "../state/types";
+import { Types, type Metadata } from "../state/types";
 import { SimpleRenderer, type Renderer } from "./renderer";
 
 
 export class View {
   subcription: Subscription;
-  selected: TreeID | null = null;
+  selected: Project | null = null;
   renderer: Renderer;
   
   constructor(
@@ -17,7 +17,7 @@ export class View {
     project?: TreeID
   ) {
     this.renderer = (renderer) ? renderer : new SimpleRenderer();
-    if (project) this.selected = project;
+    if (project) this.selected = this.state.getProject(project) ?? null;
     
     this.subcription = this.state.subscribe(this.on_change.bind(this))
   }
@@ -46,6 +46,8 @@ export class View {
   }
   
   private on_change(event: LoroEventBatch) {
+    if (this.selected == null) return;
+    
     const events = this.dedupe(event.events);
     
     requestAnimationFrame(() => {
@@ -54,6 +56,10 @@ export class View {
         else
         if (event.diff.type === "map") this.updateElement(event)
       }
+      
+      this.selected?.percentage((id, per) => {
+        this.renderer.update(id, { percentage: per })
+      })
     })
   }
   private get create(): Record<Types, (node: LoroTreeNode) => HTMLElement> {
@@ -95,6 +101,10 @@ export class View {
   private updateElement(item: LoroEvent) {
     const id = item.path[1] as TreeID;
     const changes = (item.diff as MapDiff).updated;
+    
+    delete changes.percentage;
+    if (Object.keys(changes).length == 0) return;
+    
     this.renderer.update(id, changes);
   }
   
