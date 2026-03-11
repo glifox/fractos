@@ -19,11 +19,11 @@ const pr = Project.new(tree.createNode(), {
   description: "Description"
 });
 
-const view = new View(
-  state,
-  new Debuger(log([])),
-  pr.id,
-);
+// const view = new View(
+//   state,
+//   // new Debuger(log([])),
+//   pr.id,
+// );
 
 doc.commit();
 

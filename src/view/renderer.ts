@@ -8,13 +8,9 @@ type TaskElement = TaskData & {
   parent: TreeID,
 }
 
-type ProjectElement = ProjectData & {
-  target: TreeID
-}
-
 export interface Renderer {
-  createTask(element: TaskElement): HTMLElement,
-  createProject(element: ProjectElement): HTMLElement,
+  createTask(element: TaskElement): void,
+  createProject(element: ProjectData & { id: TreeID }): void,
   
   update(id: TreeID, metadata: Metadata): void,
   delete(id: TreeID): void,
@@ -24,10 +20,10 @@ export interface Renderer {
 }
 
 export class SimpleRenderer implements Renderer {
-  createTask(element: TaskElement): HTMLElement {
+  createTask(element: TaskElement): void {
     throw new Error("Method not implemented.");
   }
-  createProject(element: ProjectElement): HTMLElement {
+  createProject(element: ProjectData): void {
     throw new Error("Method not implemented.");
   }
   update(id: TreeID, metadata: Metadata): void {

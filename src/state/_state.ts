@@ -25,6 +25,14 @@ export class State {
     return Project.from(node.node);
   }
   
+  getProjects(): Project[] {
+    return this.tree.getNodes()
+      .flatMap((node) => {
+        try   { return [Project.from(node)] }
+        catch { return [] }
+      })
+  }
+  
   getTask(target: TreeID): Task | undefined {
     const node = this.getNode(target);
     if (!node) return undefined;

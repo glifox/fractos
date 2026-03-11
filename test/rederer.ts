@@ -19,7 +19,7 @@ export class Debuger implements Renderer {
     return document.createElement("div");
   }
   
-  createProject(element: ProjectData & { target: TreeID; }): HTMLElement {
+  createProject(element: ProjectData & { id: TreeID; }): HTMLElement {
     this.stack.push({ create: element, type: "project" })
     this._update();
     return document.createElement("div");

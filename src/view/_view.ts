@@ -1,31 +1,58 @@
-import type { LoroEvent, LoroEventBatch, LoroTreeNode, MapDiff, Subscription, TreeDiff, TreeDiffItem, TreeID } from "loro-crdt";
+import type { LoroEvent, LoroEventBatch, LoroTreeNode, MapDiff, Subscription, TreeDiffItem, TreeID } from "loro-crdt";
 import { State } from "../state/_state";
 import { Task } from "../state/tasks";
 import { Project } from "../state/project";
-import { Types, type Metadata } from "../state/types";
+import { Types } from "../state/types";
 import { SimpleRenderer, type Renderer } from "./renderer";
 
+interface One { type: "selection", project: Project }
+interface All { type: "all" };
+interface None { type: "none" };
+
+export type Mode = One | All | None; 
+
+type ViewConfiguration = {
+  renderer?: Renderer,
+  mode?: Mode,
+}
+
+type visibleNode = { [key: TreeID]: boolean };
 
 export class View {
   subcription: Subscription;
-  selected: Project | null = null;
+  mode: Mode = { type: "none" };
+  visible: visibleNode = {  };
   renderer: Renderer;
   
   constructor(
     public state: State,
-    renderer?: Renderer,
-    project?: TreeID
+    config: ViewConfiguration,
   ) {
-    this.renderer = (renderer) ? renderer : new SimpleRenderer();
-    if (project) this.selected = this.state.getProject(project) ?? null;
+    this.renderer = (config.renderer) ? config.renderer : new SimpleRenderer();
+    this.render(config?.mode)
     
     this.subcription = this.state.subscribe(this.on_change.bind(this))
+  }
+  
+  private render(mode?: Mode) {
+    if (!mode || mode.type === "none") return;
+    else
+    if (mode.type === "selection") {
+      this.visible[mode.project.id] = true;
+      this.renderer.createProject({ id: mode.project.id, ...mode.project.metadata});
+    }
+    else
+    if (mode.type === "all") {
+      for (const pr of this.state.getProjects()) {
+        this.visible[pr.id] = true;
+        this.renderer.createProject({ id: pr.id, ...pr.metadata });
+      }
+    }
   }
   
   private *dedupe(events: LoroEvent[]) {
     const creation: Set<TreeID> = new Set();
     
-    console.table( events);
     for (const event of events) {
       if (event.diff.type === "tree") {
         for (const treediff of event.diff.diff) {
@@ -46,7 +73,8 @@ export class View {
   }
   
   private on_change(event: LoroEventBatch) {
-    if (this.selected == null) return;
+    if (this.mode.type == "none") return;
+    console.info( "events", event);
     
     const events = this.dedupe(event.events);
     
@@ -56,21 +84,18 @@ export class View {
         else
         if (event.diff.type === "map") this.updateElement(event)
       }
-      
-      this.selected?.percentage((id, per) => {
-        this.renderer.update(id, { percentage: per })
-      })
     })
   }
-  private get create(): Record<Types, (node: LoroTreeNode) => HTMLElement> {
+  
+  private get create(): Record<Types, (node: LoroTreeNode) => void> {
     return {
       [Types.PROJECT]: (node) => {
         const project = Project.from(node);
-        return this.renderer.createProject({ target: project.id, ... project.metadata })
+        this.renderer.createProject({ id: project.id, ...project.metadata})
       },
       [Types.TASK]: (node) => {
         const task = Task.from(node);
-        return this.renderer.createTask({
+        this.renderer.createTask({
           target: task.id,
           parent: task.parent!.id,
           ... task.metadata
@@ -78,22 +103,25 @@ export class View {
       }
     }
   }
-  private updateTree(items: TreeDiffItem[]) {
-    // const fragmento = document.createDocumentFragment();
+  
+  private updateTree(items: TreeDiffItem[]) {    
+    const actions = {
+      create: (item: TreeDiffItem) => { 
+        const node = this.state.getNode(item.target);
+        if (!node) return;
+        
+        // todo: Control de creacion, si ya existe o no esta visible no enviar la solicitud de crear 
+        if (node.type === Types.PROJECT) return;
+        this.create[node.type](node.node)
+      },
+      delete: (item: TreeDiffItem) => { 
+      },
+      move: (item: TreeDiffItem) => { 
+        
+      },
+    }
     
-    for (const item of items) {
-      const actions = {
-        create: (item: TreeDiffItem) => { 
-          const node = this.state.getNode(item.target);
-          if (!node) return;
-          
-          // todo: Control de creacion, si ya existe o no esta visible no enviar la solicitud de crear 
-          this.create[node.type](node.node)
-        },
-        delete: (item: TreeDiffItem) => {  },
-        move: (item: TreeDiffItem) => {  },
-      }
-      
+    for (const item of items) {      
       if (item.action in actions) actions[item.action](item)
     }
   }

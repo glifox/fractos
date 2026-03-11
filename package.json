@@ -12,6 +12,8 @@
   "dependencies": {
     "@catppuccin/codemirror": "^1.0.3",
     "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/state": "^6.5.4",
+    "@glifox/gnosis": "^0.0.19",
     "codemirror": "^6.0.2",
     "loro-crdt": "^1.10.6",
     "uuid": "^13.0.0"
