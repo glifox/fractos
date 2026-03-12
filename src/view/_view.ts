@@ -1,9 +1,9 @@
 import type { LoroEvent, LoroEventBatch, LoroTreeNode, MapDiff, Subscription, TreeDiffItem, TreeID } from "loro-crdt";
-import { State } from "../state/_state";
+import { FractosState } from "../state/_state";
 import { Task } from "../state/tasks";
 import { Project } from "../state/project";
 import { Types } from "../state/types";
-import { SimpleRenderer, type Renderer } from "./renderer";
+import { type FractosRenderer } from "./renderer";
 
 interface One { type: "selection", project: Project }
 interface All { type: "all" };
@@ -12,23 +12,28 @@ interface None { type: "none" };
 export type Mode = One | All | None; 
 
 type ViewConfiguration = {
-  renderer?: Renderer,
+  renderer: FractosRenderer,
   mode?: Mode,
 }
 
-type visibleNode = { [key: TreeID]: boolean };
+export type ElementState = {
+  show_children: boolean,
+  show_description: boolean,
+}
 
-export class View {
+type visibleNode = { [key: TreeID]: ElementState };
+
+export class FractosView {
   subcription: Subscription;
   mode: Mode = { type: "none" };
   visible: visibleNode = {  };
-  renderer: Renderer;
+  renderer: FractosRenderer;
   
   constructor(
-    public state: State,
+    public state: FractosState,
     config: ViewConfiguration,
   ) {
-    this.renderer = (config.renderer) ? config.renderer : new SimpleRenderer();
+    this.renderer = config.renderer;
     this.render(config?.mode)
     
     this.subcription = this.state.subscribe(this.on_change.bind(this))
@@ -38,13 +43,13 @@ export class View {
     if (!mode || mode.type === "none") return;
     else
     if (mode.type === "selection") {
-      this.visible[mode.project.id] = true;
+      this.visible[mode.project.id] = { show_children: true, show_description: true };
       this.renderer.createProject({ id: mode.project.id, ...mode.project.metadata});
     }
     else
     if (mode.type === "all") {
       for (const pr of this.state.getProjects()) {
-        this.visible[pr.id] = true;
+        this.visible[pr.id] = { show_children: true, show_description: true };
         this.renderer.createProject({ id: pr.id, ...pr.metadata });
       }
     }

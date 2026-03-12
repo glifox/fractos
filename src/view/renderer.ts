@@ -8,7 +8,7 @@ type TaskElement = TaskData & {
   parent: TreeID,
 }
 
-export interface Renderer {
+export interface FractosRenderer {
   createTask(element: TaskElement): void,
   createProject(element: ProjectData & { id: TreeID }): void,
   
@@ -17,23 +17,4 @@ export interface Renderer {
   
   // reorderChilds(id: TreeID): HTMLElement,
   move(target: TreeID, parent?: TreeID): void,
-}
-
-export class SimpleRenderer implements Renderer {
-  createTask(element: TaskElement): void {
-    throw new Error("Method not implemented.");
-  }
-  createProject(element: ProjectData): void {
-    throw new Error("Method not implemented.");
-  }
-  update(id: TreeID, metadata: Metadata): void {
-    throw new Error("Method not implemented.");
-  }
-  delete(id: TreeID): void {
-    throw new Error("Method not implemented.");
-  }
-  move(target: TreeID, parent?: TreeID): void {
-    throw new Error("Method not implemented.");
-  }
-  
 }

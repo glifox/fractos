@@ -1,10 +1,10 @@
 import type { TreeID } from "loro-crdt";
 import type { Metadata, ProjectData, TaskData } from "../src/state/types";
-import type { Renderer } from "../src/view/renderer";
+import type { FractosRenderer } from "../src/view/renderer";
 import type { EditorView } from "codemirror";
 
 
-export class Debuger implements Renderer {
+export class Debuger implements FractosRenderer {
   stack: any[] = [];
   
   constructor(private editor: EditorView) { }
