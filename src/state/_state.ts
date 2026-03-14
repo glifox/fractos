@@ -11,7 +11,7 @@ export class FractosState {
   }
   
   newProject(project: ProjectData): Project {
-    const pr = Project.new(this.tree.createNode(), project)
+    const pr = Project.new(this.tree.createNode(), project, this.commit)
     this.commit();
     return pr
   }
@@ -21,7 +21,7 @@ export class FractosState {
     const node = this.getNodeById(target);
     if (!node) return undefined;
     
-    return new FractosNode(node);
+    return new FractosNode(node, this.commit);
   }
   
   getProject(target: TreeID): Project | undefined {
@@ -29,13 +29,13 @@ export class FractosState {
     if (!node) return undefined;
     if (node.type !== Types.PROJECT) return undefined;
     
-    return Project.from(node.node);
+    return Project.from(node.node, this.commit);
   }
   
   getProjects(): Project[] {
     return this.tree.getNodes()
       .flatMap((node) => {
-        try   { return [Project.from(node)] }
+        try   { return [Project.from(node, this.commit)] }
         catch { return [] }
       })
   }
@@ -45,7 +45,7 @@ export class FractosState {
     if (!node) return undefined;
     if (node.type !== Types.TASK) return undefined;
     
-    return Task.from(node.node);
+    return Task.from(node.node, this.commit);
   }
   
   delete(target: TreeID) {

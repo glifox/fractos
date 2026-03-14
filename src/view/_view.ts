@@ -1,6 +1,6 @@
 import type { LoroEvent, LoroEventBatch, LoroTreeNode, MapDiff, Subscription, TreeDiffItem, TreeID } from "loro-crdt";
 import { FractosState } from "../state/_state";
-import { Task } from "../state/tasks";
+import { FractosNode, Task } from "../state/tasks";
 import { Project } from "../state/project";
 import { Types } from "../state/types";
 import { type FractosRenderer } from "./renderer";
@@ -92,10 +92,11 @@ export class FractosView {
     })
   }
   
-  private get create(): Record<Types, (node: LoroTreeNode) => void> {
+  private get create(): Record<Types, (node: FractosNode) => void> {
     return {
       [Types.PROJECT]: (node) => {
-        const project = Project.from(node);
+        const project = this.state.getProject(node.id);
+        if (!project) return;
         this.renderer.createProject({ id: project.id, ...project.metadata})
       },
       [Types.TASK]: (node) => {

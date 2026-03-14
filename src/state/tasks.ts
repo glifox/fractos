@@ -8,7 +8,7 @@ export class FractosNode {
   get parent() { return this.node.parent() };
   get children() { return this.node.children() || [] }
   
-  constructor(public node: LoroTreeNode) { }
+  constructor(public node: LoroTreeNode, protected commit: () => void) { }
   
   protected get _percentage() { return this.node.data.get("percentage") as number };
   percentage(callback: (child: TreeID, percentage: number) => void = () => { }): number {
@@ -24,7 +24,7 @@ export class FractosNode {
     
     let sum = 0;
     for (const child of children) {
-      const node = new FractosNode(child);
+      const node = new FractosNode(child, this.commit);
       sum += node.percentage(callback);
     }
     
@@ -49,7 +49,7 @@ export class FractosNode {
     return records[this.type];
   }
   
-  createTask(data: TaskData): Task { return Task.new(this.node.createNode(), data); }
+  createTask(data: TaskData): Task { return Task.new(this.node.createNode(), data, this.commit); }
   update(data: { project?: ProjectData, task?: TaskData }): boolean {
     const records: Record<Types, () => boolean> = {
       [Types.PROJECT]: () => { 
@@ -68,8 +68,8 @@ export class FractosNode {
 }
 
 export class Task extends FractosNode {
-  private constructor(node: LoroTreeNode) {
-    super(node)
+  private constructor(node: LoroTreeNode, commit: () => void) {
+    super(node, commit)
     if (!this.parent) throw Error(`A task can not be orphan`);
     if (this.type !== Types.TASK) throw Error(`this node is of type: ${this.type}`);
   }
@@ -79,11 +79,14 @@ export class Task extends FractosNode {
    * @param node A node of type Project
    * @throws Error if the provided node is not a Project
    */
-  static from(node: LoroTreeNode): Task { return new Task(node) }
-  static new(node: LoroTreeNode, task: TaskData): Task {
+  static from(node: LoroTreeNode, commit: () => void): Task { return new Task(node, commit) }
+  static new(node: LoroTreeNode, task: TaskData, commit: () => void): Task {
+    const _task = new Task(node, commit);
     node.data.set("type", Types.TASK);
     populateTask(node, task);
-    return new Task(node);
+    
+    commit()
+    return _task;
   }
   
   get metadata(): TaskData {

@@ -4,8 +4,8 @@ import { FractosNode } from "./tasks";
 
 
 export class Project extends FractosNode {  
-  private constructor(node: LoroTreeNode) {
-    super(node);
+  private constructor(node: LoroTreeNode, commit: () => void) {
+    super(node, commit);
     if (this.parent) throw Error(`A project can not have a parent`);
     if (this.type !== Types.PROJECT) throw Error(`this node is of type: ${this.type}`);
   }
@@ -15,11 +15,15 @@ export class Project extends FractosNode {
    * @param node A node of type Project
    * @throws Error if the provided node is not a Project
    */
-  static from(node: LoroTreeNode): Project { return new Project(node) }
-  static new(node: LoroTreeNode, project: ProjectData): Project {
+  static from(node: LoroTreeNode, commit: () => void): Project { return new Project(node, commit) }
+  static convert(node: FractosNode): Project { return new Project(node.node, node.commit) }
+  static new(node: LoroTreeNode, project: ProjectData, commit: () => void): Project {
+    const _pr = new Project(node, commit);
     node.data.set("type", Types.PROJECT);
     populateProject(node, project);
-    return new Project(node);
+    
+    commit()
+    return _pr
   }
   
   get metadata(): ProjectData {
