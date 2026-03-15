@@ -103,7 +103,7 @@ export class FractosState {
   percentage(node: LoroTreeNode): number { return (node.data.get("percentage") || 0)  as number }
   private updateParent(parent: LoroTreeNode) {
     const children = parent.children()!;
-    this.assert(children.length > 1, "Imposible yo update a parent with no children");
+    this.assert(children.length > 0, "Imposible yo update a parent with no children");
     const last = this.percentage(parent);
     
     let sum = 0;

@@ -32,6 +32,15 @@ logger.change(doc.toJSON());
 state.createTask({
   title: "llamar a jesus",
   description: "Si señor",
+  percentage: 20,
+}, pr)
+
+logger.change(doc.toJSON());
+
+state.createTask({
+  title: "otra tarea",
+  description: "Si señor",
+  percentage: 100,
 }, pr)
 
 logger.change(doc.toJSON());
