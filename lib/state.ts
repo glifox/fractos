@@ -1,5 +1,5 @@
-import { LoroTree, LoroTreeNode, type LoroDoc, type LoroMap, type TreeID } from "loro-crdt";
-import type { Project } from "../src/state/project";
+import { LoroTree, LoroTreeNode, type LoroDoc, type TreeID } from "loro-crdt";
+
 
 const types = ["project", "task"] as const;
 type Type = typeof types[number];
