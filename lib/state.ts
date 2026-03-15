@@ -1,8 +1,6 @@
 import { LoroTree, LoroTreeNode, type LoroDoc, type LoroMap, type TreeID } from "loro-crdt";
 import type { Project } from "../src/state/project";
 
-
-
 const types = ["project", "task"] as const;
 type Type = typeof types[number];
 
@@ -18,6 +16,11 @@ export class FractosState {
     this.root = this.doc.getTree(config.id || "fractos")
   }
   
+  private assert(test: unknown, message: string) {
+    if (test) return;
+    throw Error(`[fractos:state]: ${message}`)
+  }
+  
   private commit(action: Action, type: Type, message: string) {
     return this.doc.commit({
       origin: `fractos::${action}::${type}`,
@@ -28,15 +31,16 @@ export class FractosState {
   
   private getNodeByID(id: TreeID): LoroTreeNode {
     const node = this.root.getNodeByID(id);
-    if (!node) throw Error(`[fractos:state]: Node not found with id: '${id}'`);
-    return node;
+    this.assert(node, `Node not found with id: '${id}'`);
+    return node!;
   }
+  
   
   createProject(data: ProjectData): TreeID {
     const node = this.root.createNode();
     
     populateProject(node, data);
-    this.commit("create", "project", `Create project: ${data.title}`)
+    this.commit("create", "project", `Create project: ${data.title}`);
     
     return node.id;
   }
@@ -46,24 +50,31 @@ export class FractosState {
     
     const node = parent.createNode();
     populateTask(node, data);
-    this.commit("create", "task", `Create task: ${data.title}`)
+    this.updateParent(parent);
     
+    this.commit("create", "task", `Create task: ${data.title}`);
     return node.id;
   }
   
   moveTask(id: TreeID, parent: TreeID) {
     const node = this.getNodeByID(id);
-    if (!node.parent()) throw Error(`[fractos:state]: Node is not a task`);
+    const currentParent = node.parent(); 
+    this.assert(currentParent, "Node is not a task");
     
     const newParent = this.getNodeByID(id);
     
     this.root.move(id, parent);
+    this.updateParent(currentParent!);
+    this.updateParent(newParent);
     this.commit("move", "task", `Move task: ${node.data.get("title")} to ${newParent.data.get("title")}`);
   }
   
   update(data: Metadata & { type: Type, id: TreeID }) {
-    if (!types.includes(data.type)) throw Error(`[fractos:state]: The type can only be ${types}`)
-    if (data.type === "project" && data.percentage) throw Error(`[fractos:state]: You can not change the project percentage`)
+    this.assert(types.includes(data.type), `The type can only be ${types}`)
+    this.assert(
+      data.type === "project" && data.percentage,
+      "You can not change the project percentage"
+    )
     
     const node = this.getNodeByID(data.id);
     
@@ -75,29 +86,38 @@ export class FractosState {
       node.data.set(key, value);
     }
     
+    if (data.percentage) this.updateParent(node.parent()!)
     this.commit("update", data.type, `Update ${data.type}: ${data.title}`);
   }
   
   delete(id: TreeID) {
     const node = this.getNodeByID(id);
     this.root.delete(id);
+    const parent = node.parent();
     
-    const type = (node.parent()) ? "task" : "project";
+    if (parent) this.updateParent(parent!);
+    const type = (parent) ? "task" : "project";
     this.commit("delete", type, `Delete ${type}: ${node.data.get("title")}`)
   }
   
-  private _percentage(node: LoroTreeNode, callback: (id: TreeID, percentage: number) => void) {
-    let [count, sum] = [0, 0];
+  percentage(node: LoroTreeNode): number { return (node.data.get("percentage") || 0)  as number }
+  private updateParent(parent: LoroTreeNode) {
+    const children = parent.children()!;
+    this.assert(children.length > 1, "Imposible yo update a parent with no children");
+    const last = this.percentage(parent);
     
-    for (const child of node.children() || []) {
-      
+    let sum = 0;
+    for (const child of children) {
+      sum += this.percentage(child);
     }
     
-  }
-  
-  percentage(id: TreeID, callback: (id: TreeID, percentage: number) => void) {
-    const node = this.getNodeByID(id);
-    this._percentage(node, callback)
+    const result = sum / children.length;
+    
+    if (result == last) return;
+    parent.data.set("percentage", result);
+    
+    const _parent = parent.parent();
+    if (_parent) this.updateParent(_parent)
   }
 }
 
