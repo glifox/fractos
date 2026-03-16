@@ -1,3 +1,30 @@
 body {
     background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
+.task {
+    position: relative;
+    margin-left: 8px;
+}
+
+.task > div:has(.task) {
+    position: relative; /* <<<<<< IMPORTANT: This makes this div the positioning context */
+                        /* for its ::before pseudo-element. Without this, the ::before */
+                        /* would position relative to the main .task (otra tarea). */
+    /* No other specific styling is strictly needed on this div, but you could add padding etc. */
+}
+
+.task > div:has(.task)::before {
+    content: "";
+    position: absolute;
+    
+    bottom: 0;
+    left: 0;
+    
+    height: 100%;
+    width: 4px;
+    
+    background-color: #fab387;
+    z-index: -1;
 }

@@ -119,6 +119,22 @@ export class FractosState {
     const _parent = parent.parent();
     if (_parent) this.updateParent(_parent)
   }
+  
+  projects<K>(callback: (id: TreeID, data: Metadata) => K): K[] {
+    return this.root.roots()
+      .map((node) => {
+        return callback(node.id, getMetadata(node))
+      })
+  }
+  
+  tasks<K>(id: TreeID, callback: (id: TreeID, data: Metadata) => K): K[] {
+    const node = this.getNodeByID(id);
+    
+    return (node.children() || [])
+      .map((node) => {
+        return callback(node.id, getMetadata(node))
+      })
+  }
 }
 
 export type Metadata = {
@@ -164,4 +180,14 @@ function populateTask(node: LoroTreeNode, data: TaskData) {
     let value = data[key] || default_task_data[key];
     node.data.set(key,  value);
   }
+}
+
+function getMetadata(node: LoroTreeNode): Metadata {
+  const metadata: Metadata = {};
+  for (const key of node.data.keys()) {
+    // @ts-ignore
+    metadata[key] = node.data.get(key);
+  }
+  
+  return metadata
 }

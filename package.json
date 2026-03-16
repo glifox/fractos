@@ -9,6 +9,10 @@
   "peerDependencies": {
     "typescript": "^5"
   },
+  "scripts": {
+    "prev:state": "bun test/index.html",
+    "prev:view": "bun test/view/index.html"
+  },
   "dependencies": {
     "@catppuccin/codemirror": "^1.0.3",
     "@codemirror/lang-json": "^6.0.2",
