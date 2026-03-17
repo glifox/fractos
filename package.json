@@ -1,25 +1,33 @@
 {
   "name": "fractos",
-  "module": "index.ts",
+  "private": false,
   "type": "module",
-  "private": true,
+  "version": "0.1.0",
+  "author": "feraxhp",
+  "license": "MIT",
+  "main": "dist/fractos.js",
+  "types": "dist/fractos.d.ts",
+  "dependencies": {
+    "loro-crdt": "^1.10.6"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@catppuccin/codemirror": "^1.0.3",
+    "@codemirror/lang-json": "^6.0.2",
+    "rolldown-plugin-dts": "^0.22.5",
+    "@codemirror/state": "^6.5.4",
+    "@glifox/gnosis": "^0.0.19",
+    "rolldown": "^1.0.0-rc.9",
+    "codemirror": "^6.0.2",
+    "@types/bun": "latest",
+    "uuid": "^13.0.0"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "scripts": {
     "prev:state": "bun test/index.html",
-    "prev:view": "bun test/view/index.html"
-  },
-  "dependencies": {
-    "@catppuccin/codemirror": "^1.0.3",
-    "@codemirror/lang-json": "^6.0.2",
-    "@codemirror/state": "^6.5.4",
-    "@glifox/gnosis": "^0.0.19",
-    "codemirror": "^6.0.2",
-    "loro-crdt": "^1.10.6",
-    "uuid": "^13.0.0"
+    "prev:view": "bun test/view/index.html",
+    "build": "rm -fr dist && rolldown -c",
+    "build:prod": "rm -fr dist && NODE_ENV=production rolldown -c"
   }
 }
