@@ -78,7 +78,7 @@ export class FractosState {
   update(data: Metadata & { type: Type, id: TreeID }) {
     this.assert(types.includes(data.type), `The type can only be ${types}`)
     this.assert(
-      data.type === "project" && data.percentage,
+      data.type !== "project" && !data.percentage,
       "You can not change the project percentage"
     )
     

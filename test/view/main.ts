@@ -100,3 +100,8 @@ state.createTask({
   percentage: 60,
 }, ts)
 
+state.update({
+  id: ts,
+  type: "task",
+  title: "como?",
+})
