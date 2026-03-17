@@ -1,4 +1,4 @@
-import { LoroTree, LoroTreeNode, type LoroDoc, type TreeID } from "loro-crdt";
+import { LoroTree, LoroTreeNode, type LoroDoc, type LoroEventBatch, type Subscription, type TreeID } from "loro-crdt";
 
 
 const types = ["project", "task"] as const;
@@ -29,9 +29,15 @@ export class FractosState {
     })
   }
   
-  private getNodeByID(id: TreeID): LoroTreeNode {
+  getNodeByID(id: TreeID, type?: Type): LoroTreeNode {
     const node = this.root.getNodeByID(id);
     this.assert(node, `Node not found with id: '${id}'`);
+    
+    if (type) {
+      if (type === "project") this.assert(node?.parent() == undefined, `This ${id} is not a project`)
+      if (type === "task") this.assert(node?.parent(), `This ${id} is not a task`)
+    }
+    
     return node!;
   }
   
@@ -135,6 +141,10 @@ export class FractosState {
         return callback(node.id, getMetadata(node))
       })
   }
+  
+  subscribe(callback: (event: LoroEventBatch) => void): Subscription {
+    return this.root.subscribe(callback)
+  }
 }
 
 export type Metadata = {
@@ -182,7 +192,7 @@ function populateTask(node: LoroTreeNode, data: TaskData) {
   }
 }
 
-function getMetadata(node: LoroTreeNode): Metadata {
+export function getMetadata(node: LoroTreeNode): Metadata {
   const metadata: Metadata = {};
   for (const key of node.data.keys()) {
     // @ts-ignore

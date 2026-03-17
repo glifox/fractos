@@ -1,8 +1,12 @@
 import { LoroDoc, type TreeID } from "loro-crdt";
 import { FractosState, type Metadata } from "../../lib/state";
-import { FractosView, type __Project, type __Task, type FractosRenderer, type FractosViewState } from "../../lib/view";
+import { FractosView, type __Project, type __Task, type FractosRenderer, type ShowState } from "../../lib/view";
 
 class Simple implements FractosRenderer {
+  changeState(el: __Task | __Project, state: ShowState): void {
+    
+  } 
+  
   task(data: Metadata): __Task {
     const __root = document.createElement("div");
     const __title = document.createElement("h3");
@@ -49,26 +53,14 @@ class Simple implements FractosRenderer {
   }
 }
 
-class AllOpen implements FractosViewState {
-  constructor() { }
-  
-  show = {
-    children (id: TreeID): boolean {
-      return true
-    },
-    description (id: TreeID): boolean {
-      return true
-    },
-  };
-}
-
 const doc = new LoroDoc()
 
 const state = new FractosState({ doc });
-// const view = new FractosView({
-//   state: state,
-//   parent: document.querySelector(".view")!,
-// })
+const view = new FractosView({
+  state: state,
+  parent: document.querySelector(".view")!,
+  render: new Simple(),
+})
 
 
 const pr = state.createProject({
@@ -107,11 +99,4 @@ state.createTask({
   description: "Si señor",
   percentage: 60,
 }, ts)
-
-const view = new FractosView({
-  state: state,
-  parent: document.querySelector(".view")!,
-  render: new Simple(),
-  viewState: new AllOpen(),
-})
 
