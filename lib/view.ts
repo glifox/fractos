@@ -42,7 +42,7 @@ export class FractosView {
   private _render() { this._mode[this.mode.type](this.mode) }
   
   private _renderProject(id: TreeID, data: Metadata) {
-    const project = this.render.project(data);
+    const project = this.render.project(data, id);
     
     project.self.id = id; 
     
@@ -67,7 +67,7 @@ export class FractosView {
   }
   
   private _renderTask(id: TreeID, data: Metadata) {
-    const task = this.render.task(data);
+    const task = this.render.task(data, id);
     task.self.id = id;
     this.__tasks.set(task.self, task);
     
@@ -188,8 +188,8 @@ class ViewState {
 }
 
 export interface FractosRenderer {
-  task: (data: Metadata) => __Task,
-  project: (data: Metadata) => __Project,
+  task: (data: Metadata, id: TreeID) => __Task,
+  project: (data: Metadata, id: TreeID) => __Project,
   
   changeState: (el: __Task | __Project, state: ShowState) => void;
 }

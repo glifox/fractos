@@ -28,6 +28,7 @@
     "prev:state": "bun test/index.html",
     "prev:view": "bun test/view/index.html",
     "build": "rm -fr dist && rolldown -c",
+    "build:watch": "rm -fr dist && rolldown -cw",
     "build:prod": "rm -fr dist && NODE_ENV=production rolldown -c"
   }
 }

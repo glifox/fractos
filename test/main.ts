@@ -37,10 +37,18 @@ state.createTask({
 
 logger.change(doc.toJSON());
 
-state.createTask({
+const tsk = state.createTask({
   title: "otra tarea",
   description: "Si señor",
-  percentage: 100,
+  percentage: 0,
 }, pr)
 
 logger.change(doc.toJSON());
+
+state.update({
+  id: tsk,
+  type: "task",
+  percentage: 12
+})
+
+logger.change({ update: "percentage", ...doc.toJSON()});
