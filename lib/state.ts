@@ -78,7 +78,7 @@ export class FractosState {
   update(data: Metadata & { type: Type, id: TreeID }) {
     this.assert(types.includes(data.type), `The type can only be ${types}`)
     if (data.type === "project") {
-      this.assert(!data.percentage, "You can not change the project percentage")
+      this.assert(("percentage" in data), "You can not change the project percentage")
     }
     
     const node = this.getNodeByID(data.id);
@@ -90,12 +90,12 @@ export class FractosState {
     for (const key of Object.keys(default_data)) {
       // @ts-ignore
       let value = data[key];
-      if (!value) continue;
+      if (value == null || value == undefined) continue;
       
       node.data.set(key, value);
     }
     
-    if (data.percentage) this.updateParent(node.parent()!)
+    if ("percentage" in data) this.updateParent(node.parent()!)
     this.commit("update", data.type, `Update ${data.type}: ${data.title}`);
   }
   
