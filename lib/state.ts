@@ -56,7 +56,7 @@ export class FractosState {
     
     const node = parent.createNode();
     populateTask(node, data);
-    this.updateParent(parent);
+    this.__reCalculatePercentage(parent);
     
     this.commit("create", "task", `Create task: ${data.title}`);
     return node.id;
@@ -70,8 +70,8 @@ export class FractosState {
     const newParent = this.getNodeByID(id);
     
     this.root.move(id, parent);
-    this.updateParent(currentParent!);
-    this.updateParent(newParent);
+    this.__reCalculatePercentage(currentParent!);
+    this.__reCalculatePercentage(newParent);
     this.commit("move", "task", `Move task: ${node.data.get("title")} to ${newParent.data.get("title")}`);
   }
   
@@ -95,7 +95,7 @@ export class FractosState {
       node.data.set(key, value);
     }
     
-    if ("percentage" in data) this.updateParent(node.parent()!)
+    if ("percentage" in data) this.__reCalculatePercentage(node.parent()!)
     this.commit("update", data.type, `Update ${data.type}: ${data.title}`);
   }
   
@@ -104,15 +104,14 @@ export class FractosState {
     this.root.delete(id);
     const parent = node.parent();
     
-    if (parent) this.updateParent(parent!);
+    if (parent) this.__reCalculatePercentage(parent!);
     const type = (parent) ? "task" : "project";
     this.commit("delete", type, `Delete ${type}: ${node.data.get("title")}`)
   }
   
-  percentage(node: LoroTreeNode): number { return (node.data.get("percentage") || 0)  as number }
-  private updateParent(parent: LoroTreeNode) {
-    const children = parent.children()!;
-    this.assert(children.length > 0, "Imposible yo update a parent with no children");
+  private percentage(node: LoroTreeNode): number { return (node.data.get("percentage") || 0) as number }
+  private __reCalculatePercentage(parent: LoroTreeNode) {
+    const children = parent.children() || [];
     const last = this.percentage(parent);
     
     let sum = 0;
@@ -120,13 +119,20 @@ export class FractosState {
       sum += this.percentage(child);
     }
     
-    const result = sum / children.length;
+    const result = (children.length > 0) ? sum / children.length : 0;
     
     if (result == last) return;
     parent.data.set("percentage", result);
     
     const _parent = parent.parent();
-    if (_parent) this.updateParent(_parent)
+    if (_parent) this.__reCalculatePercentage(_parent)
+  }
+  
+  reCalculatePercentage(id: TreeID) {
+    const parent = this.getNodeByID(id);
+    const type = parent.parent() ? "task" : "project";
+    this.__reCalculatePercentage(parent);
+    this.commit("update", type, `Recaulculate percentage: ${type}`);
   }
   
   projects<K>(callback: (id: TreeID, data: Metadata) => K): K[] {
