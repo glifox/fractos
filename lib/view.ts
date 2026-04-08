@@ -156,6 +156,16 @@ export class FractosView {
         
         continue;
       }
+      else 
+      if (item.action == "delete") {
+        const treeid = item.target;
+        const __element = document.getElementById(treeid);
+        if (!__element) continue;
+        
+        __element.remove()
+        
+        continue;
+      }
     }
   }
 }
