@@ -101,8 +101,8 @@ export class FractosState {
   
   delete(id: TreeID) {
     const node = this.getNodeByID(id);
-    this.root.delete(id);
     const parent = node.parent();
+    this.root.delete(id);
     
     if (parent) this.__reCalculatePercentage(parent!);
     const type = (parent) ? "task" : "project";
