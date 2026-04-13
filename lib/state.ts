@@ -7,6 +7,8 @@ type Type = typeof types[number];
 const actions = ["create", "move", "update", "delete"] as const;
 type Action = typeof actions[number];
 
+type Target = { node: LoroTreeNode } | { id: TreeID };
+
 export class FractosState {
   private doc: LoroDoc
   private root: LoroTree
@@ -27,6 +29,16 @@ export class FractosState {
       message,
       timestamp: (Date.now() / 1000)
     })
+  }
+  
+  private nodeFromTarget(target: Target): LoroTreeNode {
+    if ('node' in target) return target.node
+    else
+    if ('id' in target) return this.getNodeByID(target.id)
+    
+    this.assert(false, `Invalid parameter ${target}`)
+    // @ts-ignore
+    return;
   }
   
   getNodeByID(id: TreeID, type?: Type): LoroTreeNode {
@@ -73,6 +85,28 @@ export class FractosState {
     this.__reCalculatePercentage(currentParent!);
     this.__reCalculatePercentage(newParent);
     this.commit("move", "task", `Move task: ${node.data.get("title")} to ${newParent.data.get("title")}`);
+  }
+  
+  moveRelativeTo(target: Target, type: { type: 'after' | 'before', base: Target }) {
+    this.assert(
+      (type.type === 'after' || type.type === 'before')
+      , ``
+    )
+    const node = this.nodeFromTarget(target);
+    const base = this.nodeFromTarget(type.base);
+    
+    const node_parent = node.parent();
+    const base_parent = base.parent();
+    
+    if (type.type === 'after') node.moveAfter(base)
+    if (type.type === 'before') node.moveBefore(base)
+    
+    if (node_parent?.id !== base_parent?.id) {
+      if (node_parent) this.__reCalculatePercentage(node_parent)
+      if (base_parent) this.__reCalculatePercentage(base_parent)
+    }
+    
+    this.commit("move", node_parent ? 'task' : 'project', `Move node ${type.type}`);
   }
   
   update(data: Omit<Metadata, 'index'> & { type: Type, id: TreeID }) {

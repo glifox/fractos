@@ -90,13 +90,13 @@ state.createTask({
   percentage: 10,
 }, ts)
 
-state.createTask({
+const s3 = state.createTask({
   title: "subtarea3",
   description: "Si señor",
   percentage: 0,
 }, ts)
 
-state.createTask({
+const s2 = state.createTask({
   title: "subtarea2",
   description: "Si señor",
   percentage: 60,
@@ -107,3 +107,22 @@ state.update({
   type: "task",
   title: "como?",
 })
+
+let timeoutId: number | null = null;
+
+function startTimer() {
+  const startTime = Date.now();
+  
+  const timeoutHandler = () => {
+    if (Date.now() - startTime >= 2000) {
+      state.moveRelativeTo({ id: s3 }, { type: 'after', base: { id: s2 } })
+      window.cancelAnimationFrame(timeoutId!);
+    } else {
+      timeoutId = requestAnimationFrame(timeoutHandler);
+    }
+  };
+
+  timeoutId = requestAnimationFrame(timeoutHandler);
+}
+
+startTimer();
