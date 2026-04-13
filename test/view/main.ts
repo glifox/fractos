@@ -9,16 +9,18 @@ class Simple implements FractosRenderer {
   
   task(data: Metadata): __Task {
     const __root = document.createElement("div");
+    const __index = document.createElement("h3");
     const __title = document.createElement("h3");
     const __percentage = document.createElement("span");
     const __description = document.createElement("p");
     const __tasks = document.createElement("div");
     
-    __title.innerText = data.title || "";
+    __index.innerText = `${data.index}`;
+    __title.innerText = `${data.title}`;
     __description.innerText = data.description || "";
     __percentage.innerText = `${data.percentage || 0}%`;
     
-    __root.append(__title, __percentage, __description, __tasks)
+    __root.append(__index, __title, __percentage, __description, __tasks)
     __root.classList.add("task")
     
     return {
@@ -37,7 +39,7 @@ class Simple implements FractosRenderer {
     const __description = document.createElement("p");
     const __tasks = document.createElement("div");
     
-    __title.innerText = data.title || "";
+    __title.innerText = `(${data.index}) - ${data.title}`;
     __description.innerText = data.description || "";
     __percentage.innerText = `${data.percentage || 0}%`;
     

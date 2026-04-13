@@ -75,7 +75,7 @@ export class FractosState {
     this.commit("move", "task", `Move task: ${node.data.get("title")} to ${newParent.data.get("title")}`);
   }
   
-  update(data: Metadata & { type: Type, id: TreeID }) {
+  update(data: Omit<Metadata, 'index'> & { type: Type, id: TreeID }) {
     this.assert(types.includes(data.type), `The type can only be ${types}`)
     if (data.type === "project") {
       this.assert(("percentage" in data), "You can not change the project percentage")
@@ -161,7 +161,7 @@ export type Metadata = {
     K extends keyof TaskData ? TaskData[K] : 
     K extends keyof ProjectData ? ProjectData[K] : 
     never;
-};
+} & { index: number };
 
 export type ProjectData = {
   title: string,
@@ -202,7 +202,10 @@ function populateTask(node: LoroTreeNode, data: TaskData) {
 }
 
 export function getMetadata(node: LoroTreeNode): Metadata {
-  const metadata: Metadata = {};
+  const metadata: Metadata = {
+    index: node.index()!,
+  };
+  
   for (const key of node.data.keys()) {
     // @ts-ignore
     metadata[key] = node.data.get(key);
