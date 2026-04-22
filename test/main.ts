@@ -1,7 +1,6 @@
 import { LoroDoc } from "loro-crdt";
 import { Editor } from "./editor";
-import type { EditorView } from "codemirror";
-import { FractosState } from "../lib/state";
+import { FractosState } from "../lib/lib";
 
 const log = (obj: Object) => {
   const editor = Editor(JSON.stringify(obj, null, 2))
@@ -22,32 +21,39 @@ doc.subscribe((e) => {
 
 const logger = log(doc.toJSON());
 
-const pr = state.createProject({
+const pr = state.create({
+  type: "project",
   title: "this is not a project",
   description: "Just kidding, it is",
 })
 
 logger.change(doc.toJSON());
 
-state.createTask({
+state.create({
+  type: "task",
   title: "llamar a jesus",
   description: "Si señor",
   percentage: 20,
-}, pr)
+  parent: pr,
+})
 
 logger.change(doc.toJSON());
 
-const tsk = state.createTask({
+const tsk = state.create({
+  type: "task", 
   title: "otra tarea",
   description: "Si señor",
   percentage: 0,
-}, pr)
+  parent: pr,
+})
 
 logger.change(doc.toJSON());
 
-state.update({
-  id: tsk,
+state.create({
   type: "task",
+  parent: tsk,
+  title: "",
+  description: "",
   percentage: 12
 })
 
