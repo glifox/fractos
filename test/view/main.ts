@@ -1,6 +1,6 @@
 import { LoroDoc, type TreeID } from "loro-crdt";
 import { FractosState, type Metadata } from "../../lib/state";
-import { FractosView, type __Project, type __Task, type FractosRenderer, type ShowState } from "../../lib/view";
+import { FractosView, type __Project, type __Task, type FractosRenderer, type ShowState } from "../../lib/view_old";
 
 class Simple implements FractosRenderer {
   changeState(el: __Task | __Project, state: ShowState): void {
