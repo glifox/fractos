@@ -17,7 +17,7 @@ class Project implements Node<'project'> {
     this.content = document.createElement('div');
     this.delete = document.createElement('button');
     
-    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage')}`
+    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
     this.delete.innerText = 'delete'
     
     this.element.append(this.content, this.delete)
@@ -79,12 +79,25 @@ state.create({
   percentage: 20,
 })
 
-const _ = state.create({
-  type: "project",
-  title: "Project2",
-  description: "{{ Desc }}",
-})
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+async function createProjects() {
+  for (let i = 0; i < 20; i++) {
+    
+    // Ejecuta la creación del proyecto
+    const _ = state.create({
+      type: "project",
+      title: `Project [${i}]`,
+      description: "-- Desc --",
+    });
 
+    // Espera 100ms antes de la siguiente iteración
+    await wait(10); 
+    
+    console.log(`Proyecto ${i} creado`);
+  }
+}
+
+createProjects();
 // const ts = state.createTask({
 //   title: "otra tarea",
 //   description: "Si señor",
