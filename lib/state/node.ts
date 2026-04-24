@@ -1,4 +1,4 @@
-import { LoroTreeNode } from "loro-crdt";
+import { LoroTreeNode, type TreeID } from "loro-crdt";
 
 export type ProjectData = {
   type: 'project',
@@ -19,7 +19,7 @@ export type FractosNodeType = { [P in FractosNodeData as P['type']]: P; };
 
 type AllNodeKeys<T> = T extends any ? keyof T : never;
 export type Keys = AllNodeKeys<FractosNodeData>;
-type ValueOf<T, K extends PropertyKey> = T extends any ? K extends keyof T ? T[K] : never : never;
+export type ValueOf<T, K extends PropertyKey> = T extends any ? K extends keyof T ? T[K] : never : never;
 
 export type Metadata = FractosNodeData & { 
   index: number,
@@ -71,5 +71,7 @@ export class FractosNode {
     // @ts-ignore
     return this.node.data.get(key);
   }
+  
+  get treeid(): TreeID { return this.node.id }
 }
 
