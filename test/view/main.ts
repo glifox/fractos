@@ -12,12 +12,12 @@ class Project implements Node<'project'> {
   constructor(private node: FractosNode) {
     this.treeid = this.node.treeid,
     this.element = document.createElement('div');
-    this.element.innerHTML = `${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage')}`
+    this.element.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage')}`
   }
   
   set<P extends keyof ProjectData>(key: keyof ProjectData, value: ProjectData[P]): void {
     console.info("key:", key);
-    this.element.innerHTML = `${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage')}`
+    this.element.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
   }
   
   moveChildNode(id: TreeID, index: number): void {
@@ -29,7 +29,6 @@ class Project implements Node<'project'> {
   removeChildNode(id: TreeID, keepElement: boolean): void {
     throw new Error("Method not implemented.");
   }
-  
 } 
 
 const doc = new LoroDoc()
@@ -64,6 +63,11 @@ state.create({
   percentage: 20,
 })
 
+const _ = state.create({
+  type: "project",
+  title: "Project2",
+  description: "{{ Desc }}",
+})
 
 // const ts = state.createTask({
 //   title: "otra tarea",

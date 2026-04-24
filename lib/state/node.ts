@@ -73,5 +73,6 @@ export class FractosNode {
   }
   
   get treeid(): TreeID { return this.node.id }
+  get index() { return this.node.index() }
 }
 
