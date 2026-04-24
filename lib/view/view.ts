@@ -18,6 +18,8 @@ export interface Node<K extends keyof FractosNodeType> {
   moveChildNode(id: TreeID, index: number): void,
   insertChildNode<C extends keyof FractosNodeType>(element: Node<C>): void,
   removeChildNode(id: TreeID, keepElement: boolean): void,
+  
+  updateIndex(): void,
 }
 
 type Renderer = { [K in NodeType]: (view: FractosView, node: FractosNode) => Node<K> };
@@ -52,6 +54,12 @@ export class FractosView {
     },
     none: (_: None) => {},
   }
+  
+  setMode(mode: ViewMode) {
+    this.mode = mode;
+    this._render();
+  }
+  
   // @ts-ignore
   private _render() { this._mode[this.mode.type](this.mode) }
   
@@ -151,7 +159,21 @@ export class FractosView {
       }
       
       if (item.action == "delete") {
+        const parent_ = item.oldParent ? this.nodes.get(item.oldParent) : undefined;
+        if (item.oldParent && !parent_) continue;
         
+        const node_ = this.nodes.get(item.target);
+        if (!node_) continue
+        
+        if (parent_) parent_.removeChildNode(node_.treeid, false);
+        else this.__parent.removeChild(node_.element);
+        
+        this.nodes.delete(node_.treeid);
+        
+        if (this.mode.type === 'selected') this.setMode({ type: 'none' }) 
+        if (this.mode.type === 'all') {
+          this.state.projects( (node) => this.nodes.get(node.treeid)?.updateIndex() )
+        }
         
         continue;
       }

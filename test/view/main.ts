@@ -7,17 +7,29 @@ class Project implements Node<'project'> {
   
   treeid: `${number}@${number}`;
   element: HTMLElement;
+  content: HTMLElement;
+  delete: HTMLButtonElement;
   showChildren: boolean = false;
   
-  constructor(private node: FractosNode) {
+  constructor(private view: FractosView, private node: FractosNode) {
     this.treeid = this.node.treeid,
     this.element = document.createElement('div');
-    this.element.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage')}`
+    this.content = document.createElement('div');
+    this.delete = document.createElement('button');
+    
+    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage')}`
+    this.delete.innerText = 'delete'
+    
+    this.element.append(this.content, this.delete)
+    
+    this.delete.addEventListener('click', () => {
+      this.view.state.delete(this.treeid);
+    })
   }
   
   set<P extends keyof ProjectData>(key: keyof ProjectData, value: ProjectData[P]): void {
     console.info("key:", key);
-    this.element.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
+    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
   }
   
   moveChildNode(id: TreeID, index: number): void {
@@ -29,6 +41,10 @@ class Project implements Node<'project'> {
   removeChildNode(id: TreeID, keepElement: boolean): void {
     throw new Error("Method not implemented.");
   }
+  
+  updateIndex(): void {
+    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
+  }
 } 
 
 const doc = new LoroDoc()
@@ -39,7 +55,7 @@ const view = new FractosView({
   parent: document.querySelector(".view")!,
   renderer: {
     project: (view, node) => {
-      return new Project(node)
+      return new Project(view, node)
     },
     task: (view, node) => {
       throw new Error("Method not implemented.");
