@@ -11,29 +11,40 @@ export class Compositor {
   
   push(node: Node<NodeType>) {
     const treeid = node.treeid;
+    if (this.nodes.has(treeid)) return;
     
     this.element.appendChild(node.element);
     this.nodes.set(treeid, node);
     this.children.push(treeid);
   }
   
-  pop(): TreeID | undefined {
+  pop(): Node<NodeType> | undefined {
     if (this.children.length == 0) return;
     
     const treeid = this.children.pop()!;
-    const node = this.nodes.get(treeid)!;
+    const node_ = this.nodes.get(treeid)!;
+    this.nodes.delete(treeid);
     
-    this.element.removeChild(node.element);
-    return treeid
+    this.element.removeChild(node_.element);
+    return node_
   }
 
-  delete (index: number): TreeID | undefined  {
-    if (this.children.length > index) return;
+  delete(treeid: TreeID): Node<NodeType> | undefined  {
+    if (!this.nodes.has(treeid)) return;
     
-    const treeid = this.children.splice(index, 1)[0]!;
+    
+    const index = this.children.indexOf(treeid);
+    if (index === -1) throw new Error(`[fractos:compositor] Desync error children must have '${treeid}'`);
+    this.children.splice(index, 1)[0]!;
+    
+    const node_ = this.nodes.get(treeid);
+    if (!node_) throw new Error(`[fractos:compositor] Desync error children must have '${treeid}'`);
+    
+    this.element.removeChild(node_.element);
+    this.nodes.delete(treeid);
     
     this.updateChildrenIndex(index);
-    return treeid
+    return node_
   }
   
   insert(node: Node<NodeType>, index: number | null) {
@@ -42,6 +53,7 @@ export class Compositor {
     
     const safeindex = (childrenlength > index) ? index : childrenlength - 1;
     const treeid = node.treeid;
+    if (this.nodes.has(treeid)) return;
     
     this.children.splice(safeindex, 0, treeid);
     this.nodes.set(treeid, node);

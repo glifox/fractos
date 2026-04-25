@@ -9,19 +9,16 @@ type ViewModeHandlers = {
 };
 
 export interface Node<K extends keyof FractosNodeType> {
-  type: K,
-  treeid: TreeID,
-  element: HTMLElement,
-  set<P extends keyof FractosNodeType[K]>(key: keyof FractosNodeType[K], value: FractosNodeType[K][P]): void;
-  
+  type: K;
+  treeid: TreeID;
+  element: HTMLElement;
+  compositor: Compositor;
   showChildren: boolean;
   
-  moveChildNode(id: TreeID, index: number, old: number): void,
-  insertChildNode<C extends keyof FractosNodeType>(element: Node<C>): void,
-  removeChildNode(id: TreeID, keepElement: boolean): void,
-  
-  updateIndex(): void,
+  set<P extends keyof FractosNodeType[K]>(key: keyof FractosNodeType[K], value: FractosNodeType[K][P]): void;
+  updateIndex(): void;
 }
+
 
 type Renderer = { [K in NodeType]: (view: FractosView, node: FractosNode) => Node<K> };
 
@@ -94,7 +91,7 @@ export class FractosView {
     
     this.nodes.set(node.treeid, node_);
     
-    parent.insertChildNode(node_);
+    parent.compositor.push(node_);
     if (node_.showChildren) this._renderChildren(node_);
   }
   
@@ -170,11 +167,10 @@ export class FractosView {
         const node_ = this.nodes.get(item.target);
         if (!node_) continue
         
-        if (parent_) parent_.removeChildNode(node_.treeid, false);
-        else this.__parent.removeChild(node_.element);
+        if (parent_) parent_.compositor.delete(node_.treeid);
+        else this.compositor.delete(node_.treeid);
         
         this.nodes.delete(node_.treeid);
-        this.compositor.delete(item.oldIndex);
         
         if (this.mode.type === 'selected') this.setMode({ type: 'none' });
         
@@ -186,7 +182,7 @@ export class FractosView {
         const oldParent = item.oldParent ? this.nodes.get(item.oldParent) : undefined;
         
         if (parent && item.parent === item.oldParent) {
-          parent.moveChildNode(item.target, item.index, item.oldIndex);
+          parent.compositor.move(item.target, item.index, item.oldIndex);
           continue;
         }
         

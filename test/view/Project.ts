@@ -1,5 +1,5 @@
 import type { TreeID } from "loro-crdt";
-import type { Node, FractosView } from "../../lib/lib";
+import { type Node, type FractosView, Compositor } from "../../lib/lib";
 import type { FractosNode, ProjectData, FractosNodeType } from "../../lib/state/node";
 
 export class Project implements Node<'project'> {
@@ -11,14 +11,16 @@ export class Project implements Node<'project'> {
   childs: HTMLElement;
   delete: HTMLButtonElement;
   showChildren: boolean = false;
-
+  compositor: Compositor;
+  
   constructor(private view: FractosView, private node: FractosNode) {
     this.treeid = this.node.treeid,
-      this.element = document.createElement('div');
+    this.element = document.createElement('div');
     this.content = document.createElement('span');
     this.delete = document.createElement('button');
     this.childs = document.createElement('div');
-
+    this.compositor = new Compositor(this.childs);
+    
     const up = document.createElement('button');
     const down = document.createElement('button');
 
@@ -57,16 +59,6 @@ export class Project implements Node<'project'> {
   set<P extends keyof ProjectData>(key: keyof ProjectData, value: ProjectData[P]): void {
     console.info("key:", key);
     this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`;
-  }
-
-  moveChildNode(id: TreeID, index: number): void {
-    throw new Error("Method not implemented.");
-  }
-  insertChildNode<C extends keyof FractosNodeType>(element: Node<C>): void {
-    this.childs.appendChild(element.element);
-  }
-  removeChildNode(id: TreeID, keepElement: boolean): void {
-    throw new Error("Method not implemented.");
   }
 
   updateIndex(): void {
