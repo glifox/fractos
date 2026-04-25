@@ -109,23 +109,18 @@ export class FractosView {
     const target_ = this.nodes.get(id);
     if (!target_) return;
     
-    let anchor_: Node<NodeType> | null = null;
-    // if (index > old) {
-      const anchorid = this.children[index]!;
-    anchor_ = this.nodes.get(anchorid)!;
-    // if (!anchor_) return;
-    // }
-    // else {
-      // const anchorid = this.children[index];
-    // }
-    this.__parent.insertBefore(target_.element, anchor_.element);
+    let anchorid: TreeID | undefined = undefined;
     
-    console.log("bef: ", this.children)
+    if (index > old) anchorid = this.children[index + 1]!;
+    else anchorid = this.children[index];
+    
+    const anchor_ = anchorid ? this.nodes.get(anchorid) : undefined;
+    this.__parent.insertBefore(target_.element, anchor_?.element ?? null);
+    
     const element = this.children.splice(old, 1)[0]!;
     this.children.splice(index, 0, element);
-    console.log("aft: ", this.children)
     
-    this.updateChildrenIndex(index);
+    this.updateChildrenIndex((index > old) ? old : index);
   }
   
   private *dedupe(events: LoroEventBatch) {
