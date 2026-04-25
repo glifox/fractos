@@ -164,20 +164,34 @@ export class FractosView {
       }
       
       if (item.action == "move") {
-        const parent = item.parent ? this.nodes.get(item.parent) : undefined;
-        const oldParent = item.oldParent ? this.nodes.get(item.oldParent) : undefined;
+        const parent_ = item.parent ? this.nodes.get(item.parent) : undefined;
+        const oldParent_ = item.oldParent ? this.nodes.get(item.oldParent) : undefined;
         
-        if (parent && item.parent === item.oldParent) {
-          parent.compositor.move(item.target, item.index, item.oldIndex);
+        if (parent_ && item.parent === item.oldParent) {
+          parent_.compositor.move(item.target, item.index, item.oldIndex);
           continue;
         }
         
-        if (!oldParent && item.parent === item.oldParent) {
+        if (!oldParent_ && item.parent === item.oldParent) {
           this.compositor.move(item.target, item.index, item.oldIndex)
           continue;
         }
         
-        // todo: Move between parents
+        const node_ = oldParent_?.compositor.delete(item.target);
+        
+        if (
+          node_ &&
+          parent_ &&
+          parent_.showChildren
+        ) parent_.compositor.insert(node_, item.index);
+        
+        else
+        if (!node_ && parent_ && parent_.showChildren) {
+          const node = this.state.getFractosNodeByID(item.target);
+          this._renderNode(node, parent_);
+        }
+        
+        else if(node_) this.nodes.delete(node_.treeid);
         
         continue;
       }

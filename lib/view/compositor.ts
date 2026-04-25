@@ -59,7 +59,7 @@ export class FractosCompositor implements Compositor {
     const childrenlength = this.children.length;
     if (childrenlength === 0 || index === null) return this.push(node);
     
-    const safeindex = (childrenlength > index) ? index : childrenlength - 1;
+    const safeindex = (childrenlength >= index) ? index : childrenlength - 1;
     const treeid = node.treeid;
     if (this.nodes.has(treeid)) return;
     

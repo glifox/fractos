@@ -21,6 +21,7 @@ export class Task implements Node<'task'> {
     this.childs = document.createElement('div');
     
     this.compositor = new FractosCompositor(this.childs);
+    this.childs.style.marginLeft = '40px';
     
     const up = document.createElement('button');
     const down = document.createElement('button');

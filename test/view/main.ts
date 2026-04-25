@@ -29,7 +29,7 @@ const pr = state.create({
 })
 
 
-state.create({
+const ts1 = state.create({
   type: "task",
   parent: pr,
   title: "task 1",
@@ -37,7 +37,7 @@ state.create({
   percentage: 20,
 })
 
-state.create({
+const ts2 = state.create({
   type: "task",
   parent: pr,
   title: "task 2",
@@ -45,9 +45,17 @@ state.create({
   percentage: 20,
 })
 
+const ts3 = state.create({
+  type: "task",
+  parent: ts1,
+  title: "task 3",
+  description: "Si señor",
+  percentage: 20,
+})
+
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 async function createProjects() {
-  let id: any = null;
+  const ids:TreeID[] = [];
   for (let i = 0; i < 20; i++) {
     
     // Ejecuta la creación del proyecto
@@ -60,11 +68,15 @@ async function createProjects() {
     // Espera 100ms antes de la siguiente iteración
     await wait(10); 
     
-    if (i === 19) id = id_;
+    ids.push(id_);
   }
   
   await wait(1000); 
-  state.moveRelativeTo({ id: id as TreeID }, { type: "after", base: { id: pr } }  )
+  state.moveRelativeTo({ id: ids[19] as TreeID }, { type: "after", base: { id: pr } }  )
+  await wait(1000);
+  state.moveTask(ts2, ts1); 
+  await wait(1000);
+  state.moveTask(ts2, ids[2]!); 
 }
 
 createProjects();
