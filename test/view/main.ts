@@ -103,10 +103,11 @@ state.create({
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 async function createProjects() {
+  let id: any = null;
   for (let i = 0; i < 20; i++) {
     
     // Ejecuta la creación del proyecto
-    const _ = state.create({
+    const id_ = state.create({
       type: "project",
       title: `Project [${i}]`,
       description: "-- Desc --",
@@ -115,8 +116,11 @@ async function createProjects() {
     // Espera 100ms antes de la siguiente iteración
     await wait(10); 
     
-    console.log(`Proyecto ${i} creado`);
+    if (i === 19) id = id_;
   }
+  
+  await wait(1000); 
+  state.moveRelativeTo({ id: id as TreeID }, { type: "after", base: { id: pr } }  )
 }
 
 createProjects();
