@@ -1,73 +1,9 @@
 import { LoroDoc, type TreeID, type TreeNodeJSON } from "loro-crdt";
-import { FractosState, FractosView, type Node } from "../../lib/lib";
-import type { ProjectData, FractosNodeType, FractosNode } from "../../lib/state/node";
+import { FractosState, FractosView } from "../../lib/lib";
+import { Project } from "./Project";
+import { Task } from "./Task";
 
-class Project implements Node<'project'> {
-  type = 'project' as const;
-  
-  treeid: `${number}@${number}`;
-  element: HTMLElement;
-  content: HTMLElement;
-  delete: HTMLButtonElement;
-  showChildren: boolean = false;
-  
-  constructor(private view: FractosView, private node: FractosNode) {
-    this.treeid = this.node.treeid,
-    this.element = document.createElement('div');
-    this.content = document.createElement('span');
-    this.delete = document.createElement('button');
-    const up = document.createElement('button');
-    const down = document.createElement('button');
-    
-    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
-    this.delete.innerText = 'delete'
-    up.innerText = 'up'
-    down.innerText = 'down'
-    
-    this.element.append(this.content, this.delete, up, down)
-    this.element.dataset.treeid = this.treeid;
-    
-    this.delete.addEventListener('click', () => {
-      this.view.state.delete(this.treeid);
-    })
-    
-    up.addEventListener('click', () => {
-      const prev = this.element.previousElementSibling as HTMLElement;
-      if (!prev) return
-      
-      const id = prev.dataset.treeid as TreeID;
-      
-      this.view.state.moveRelativeTo(this.node, { type: 'before', base: { id } })
-    })
-    down.addEventListener('click', () => {
-      const next = this.element.nextElementSibling as HTMLElement;
-      if (!next) return
-      
-      const id = next.dataset.treeid as TreeID;
-      
-      this.view.state.moveRelativeTo(this.node, { type: 'after', base: { id } })
-    })
-  }
-  
-  set<P extends keyof ProjectData>(key: keyof ProjectData, value: ProjectData[P]): void {
-    console.info("key:", key);
-    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
-  }
-  
-  moveChildNode(id: TreeID, index: number): void {
-    throw new Error("Method not implemented.");
-  }
-  insertChildNode<C extends keyof FractosNodeType>(element: Node<C>): void {
-    throw new Error("Method not implemented.");
-  }
-  removeChildNode(id: TreeID, keepElement: boolean): void {
-    throw new Error("Method not implemented.");
-  }
-  
-  updateIndex(): void {
-    this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
-  }
-} 
+
 
 const doc = new LoroDoc()
 
@@ -80,7 +16,7 @@ const view = new FractosView({
       return new Project(view, node)
     },
     task: (view, node) => {
-      throw new Error("Method not implemented.");
+      return new Task(view, node)
     }
   },
 })
@@ -96,7 +32,15 @@ const pr = state.create({
 state.create({
   type: "task",
   parent: pr,
-  title: "llamar a jesus",
+  title: "task 1",
+  description: "Si señor",
+  percentage: 20,
+})
+
+state.create({
+  type: "task",
+  parent: pr,
+  title: "task 2",
   description: "Si señor",
   percentage: 20,
 })

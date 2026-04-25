@@ -1,6 +1,7 @@
 import type { LoroEvent, LoroEventBatch, TreeDiff, TreeID } from "loro-crdt";
 import { type FractosState } from "../state/state";
 import { FractosNode, type FractosNodeData, type FractosNodeType, type Keys, type nodeTypes, type NodeType, defaults, type ValueOf } from "../state/node";
+import { Compositor } from "./compositor";
 
 
 type ViewModeHandlers = {
@@ -30,7 +31,7 @@ export class FractosView {
   private __parent: HTMLElement;
   private renderer: Renderer;
   private nodes: Map<TreeID, Node<NodeType>> = new Map();
-  private children: TreeID[] = [];
+  private compositor: Compositor;
   
   constructor(config: {
     state: FractosState,
@@ -40,10 +41,13 @@ export class FractosView {
   }) {
     this.state = config.state;
     this.__parent = config.parent;
-    this.renderer = config.renderer;
-    this.mode = config.mode || { type: "all" };
     
+    this.compositor = new Compositor(this.__parent);
+    this.renderer = config.renderer;
+    
+    this.mode = config.mode || { type: "all" };
     this._render();
+    
     this.state.subscribe(this._handleEvents.bind(this));
   }
   
@@ -70,8 +74,7 @@ export class FractosView {
     const project_ = this.renderer.project(this, node);
     
     this.nodes.set(node.treeid, project_);
-    this.__parent.appendChild(project_.element);
-    this.children.push(node.treeid);
+    this.compositor.push(project_);
     
     if (project_.showChildren) this._renderChildren(project_)
   }
@@ -93,34 +96,6 @@ export class FractosView {
     
     parent.insertChildNode(node_);
     if (node_.showChildren) this._renderChildren(node_);
-  }
-  
-  private updateChildrenIndex(init: number = 0) {
-    for (let index = init; index < this.children.length; index++) {
-      const treeid = this.children[index]!;
-      const node = this.nodes.get(treeid);
-      node?.updateIndex();
-    }
-  }
-  
-  private reorderChildren(id: TreeID, index: number, old: number) {
-    if (index == old) return;
-    
-    const target_ = this.nodes.get(id);
-    if (!target_) return;
-    
-    let anchorid: TreeID | undefined = undefined;
-    
-    if (index > old) anchorid = this.children[index + 1]!;
-    else anchorid = this.children[index];
-    
-    const anchor_ = anchorid ? this.nodes.get(anchorid) : undefined;
-    this.__parent.insertBefore(target_.element, anchor_?.element ?? null);
-    
-    const element = this.children.splice(old, 1)[0]!;
-    this.children.splice(index, 0, element);
-    
-    this.updateChildrenIndex((index > old) ? old : index);
   }
   
   private *dedupe(events: LoroEventBatch) {
@@ -199,10 +174,9 @@ export class FractosView {
         else this.__parent.removeChild(node_.element);
         
         this.nodes.delete(node_.treeid);
-        this.children.splice(item.oldIndex, 1);
+        this.compositor.delete(item.oldIndex);
         
         if (this.mode.type === 'selected') this.setMode({ type: 'none' });
-        if (this.mode.type === 'all') this.updateChildrenIndex(item.oldIndex);
         
         continue;
       }
@@ -217,7 +191,7 @@ export class FractosView {
         }
         
         if (!oldParent && item.parent === item.oldParent) {
-          this.reorderChildren(item.target, item.index, item.oldIndex)
+          this.compositor.move(item.target, item.index, item.oldIndex)
           continue;
         }
         
