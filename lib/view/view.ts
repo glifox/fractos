@@ -1,26 +1,9 @@
 import type { LoroEventBatch, TreeDiff, TreeID } from "loro-crdt";
 import { type FractosState } from "../state/state";
-import { FractosNode, type FractosNodeType, type Keys, type nodeTypes, type NodeType, defaults, type ValueOf } from "../state/node";
+import { FractosNode, type Keys, type nodeTypes, type NodeType, defaults, type ValueOf } from "../state/node";
 import { FractosCompositor, type Compositor } from "./compositor";
+import type { Renderer, Node, ViewModeHandlers, ViewMode, ShowAll, Selected, None } from "./view.types";
 
-
-type ViewModeHandlers = {
-  [K in ViewMode["type"]]: (mode: Extract<ViewMode, { type: K }>) => void;
-};
-
-export interface Node<K extends keyof FractosNodeType> {
-  type: K;
-  treeid: TreeID;
-  element: HTMLElement;
-  compositor: Compositor;
-  showChildren: boolean;
-  
-  set<P extends keyof FractosNodeType[K]>(key: keyof FractosNodeType[K], value: FractosNodeType[K][P]): void;
-  updateIndex(): void;
-}
-
-
-type Renderer = { [K in NodeType]: (view: FractosView, node: FractosNode) => Node<K> };
 
 export class FractosView {
   state: FractosState;
@@ -201,8 +184,3 @@ export class FractosView {
     }
   }
 }
-
-type ViewMode = ShowAll | Selected | None;
-type ShowAll = { type: "all" };
-type Selected = { type: "selected", project: TreeID };
-type None = { type: "none" }

@@ -1,6 +1,6 @@
 import type { TreeID } from "loro-crdt";
 import { type Compositor, FractosCompositor, type FractosView, type Node } from "../../lib/lib";
-import type { TaskData, FractosNodeType, FractosNode } from "../../lib/state/node";
+import type { TaskData, FractosNodeType, FractosNode } from "../../lib/lib";
 
 export class Task implements Node<'task'> {
   type = "task" as const;

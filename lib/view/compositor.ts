@@ -1,5 +1,5 @@
 import type { TreeID } from "loro-crdt";
-import type { Node } from "./view";
+import type { Node } from "./view.types";
 import type { NodeType } from "../state/node";
 
 export interface Compositor {
