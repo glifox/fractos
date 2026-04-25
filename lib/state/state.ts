@@ -1,5 +1,5 @@
 import type { LoroDoc, LoroEventBatch, LoroTree, LoroTreeNode, Subscription, TreeID } from "loro-crdt";
-import { defaults, FractosNode, nodeTypes, type FractosNodeData, type Metadata, type NodeType, type ProjectData, type TaskData } from "./node";
+import { defaults, FractosNode, nodeTypes, type FractosNodeData, type ParcialFractosNodeData, type NodeType, type ProjectData, type TaskData } from "./node";
 
 
 type Type = NodeType;
@@ -117,7 +117,7 @@ export class FractosState {
     this.commit("move", node_parent ? 'task' : 'project', `Move node ${type.type}`);
   }
   
-  update(data: FractosNodeData & { id: TreeID }) {
+  update(data: ParcialFractosNodeData & { id: TreeID }) {
     this.assert(nodeTypes.includes(data.type), `The type can only be ${nodeTypes}`)
     if (data.type === "project") {
       this.assert(("percentage" in data), "You can not change the project percentage")

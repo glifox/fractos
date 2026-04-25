@@ -13,9 +13,13 @@ export type TaskData = {
   percentage?: number,
 }
 
+
 export type NodeType = FractosNodeData['type'];
 export type FractosNodeData = ProjectData | TaskData;
 export type FractosNodeType = { [P in FractosNodeData as P['type']]: P; };
+export type ParcialFractosNodeData = {
+  [K in FractosNodeData as 'type']: K['type'];
+} & Partial<FractosNodeData>;
 
 type AllNodeKeys<T> = T extends any ? keyof T : never;
 export type Keys = AllNodeKeys<FractosNodeData>;
