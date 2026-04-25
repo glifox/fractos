@@ -1,4 +1,4 @@
-import { LoroDoc, type TreeID } from "loro-crdt";
+import { LoroDoc, type TreeID, type TreeNodeJSON } from "loro-crdt";
 import { FractosState, FractosView, type Node } from "../../lib/lib";
 import type { ProjectData, FractosNodeType, FractosNode } from "../../lib/state/node";
 
@@ -14,16 +14,29 @@ class Project implements Node<'project'> {
   constructor(private view: FractosView, private node: FractosNode) {
     this.treeid = this.node.treeid,
     this.element = document.createElement('div');
-    this.content = document.createElement('div');
+    this.content = document.createElement('span');
     this.delete = document.createElement('button');
+    const up = document.createElement('button');
     
     this.content.innerHTML = `${this.node.index} - ${this.node.get('type')}:${this.node.get('title')}:${this.node.get('description')}:${this.node.get('percentage') ?? "0"}`
     this.delete.innerText = 'delete'
+    up.innerText = 'up'
     
-    this.element.append(this.content, this.delete)
+    this.element.append(this.content, this.delete, up)
+    this.element.dataset.treeid = this.treeid;
     
     this.delete.addEventListener('click', () => {
       this.view.state.delete(this.treeid);
+    })
+    
+    up.addEventListener('click', () => {
+      console.info("up:");
+      const prev = this.element.previousElementSibling as HTMLElement;
+      if (!prev) return
+      
+      const id = prev.dataset.treeid as TreeID;
+      
+      this.view.state.moveRelativeTo(this.node, { type: 'before', base: { id } })
     })
   }
   
