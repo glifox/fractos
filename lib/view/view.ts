@@ -1,7 +1,7 @@
-import type { LoroEvent, LoroEventBatch, TreeDiff, TreeID } from "loro-crdt";
+import type { LoroEventBatch, TreeDiff, TreeID } from "loro-crdt";
 import { type FractosState } from "../state/state";
-import { FractosNode, type FractosNodeData, type FractosNodeType, type Keys, type nodeTypes, type NodeType, defaults, type ValueOf } from "../state/node";
-import { Compositor } from "./compositor";
+import { FractosNode, type FractosNodeType, type Keys, type nodeTypes, type NodeType, defaults, type ValueOf } from "../state/node";
+import { FractosCompositor, type Compositor } from "./compositor";
 
 
 type ViewModeHandlers = {
@@ -25,24 +25,27 @@ type Renderer = { [K in NodeType]: (view: FractosView, node: FractosNode) => Nod
 export class FractosView {
   state: FractosState;
   private mode: ViewMode;
-  private __parent: HTMLElement;
   private renderer: Renderer;
   private nodes: Map<TreeID, Node<NodeType>> = new Map();
   private compositor: Compositor;
   
   constructor(config: {
-    state: FractosState,
-    parent: HTMLElement,
-    renderer: Renderer,
-    mode?: ViewMode,
-  }) {
+    state: FractosState;
+    renderer: Renderer;
+    mode?: ViewMode;
+  } & ({
+    parent: HTMLElement;
+    compositor?: never;
+  } | {
+    parent?: never;
+    compositor: Compositor;
+  })) {
     this.state = config.state;
-    this.__parent = config.parent;
     
-    this.compositor = new Compositor(this.__parent);
+    this.compositor = config.compositor ? config.compositor : new FractosCompositor(config.parent);
     this.renderer = config.renderer;
     
-    this.mode = config.mode || { type: "all" };
+    this.mode = config.mode ?? { type: "all" };
     this._render();
     
     this.state.subscribe(this._handleEvents.bind(this));

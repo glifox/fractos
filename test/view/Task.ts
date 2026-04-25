@@ -1,5 +1,5 @@
 import type { TreeID } from "loro-crdt";
-import { Compositor, type FractosView, type Node } from "../../lib/lib";
+import { type Compositor, FractosCompositor, type FractosView, type Node } from "../../lib/lib";
 import type { TaskData, FractosNodeType, FractosNode } from "../../lib/state/node";
 
 export class Task implements Node<'task'> {
@@ -20,7 +20,7 @@ export class Task implements Node<'task'> {
     this.delete = document.createElement('button');
     this.childs = document.createElement('div');
     
-    this.compositor = new Compositor(this.childs);
+    this.compositor = new FractosCompositor(this.childs);
     
     const up = document.createElement('button');
     const down = document.createElement('button');

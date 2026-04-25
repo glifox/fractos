@@ -1,5 +1,5 @@
 import { LoroDoc, type TreeID, type TreeNodeJSON } from "loro-crdt";
-import { FractosState, FractosView } from "../../lib/lib";
+import { FractosCompositor, FractosState, FractosView } from "../../lib/lib";
 import { Project } from "./Project";
 import { Task } from "./Task";
 

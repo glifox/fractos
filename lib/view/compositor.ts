@@ -2,8 +2,16 @@ import type { TreeID } from "loro-crdt";
 import type { Node } from "./view";
 import type { NodeType } from "../state/node";
 
+export interface Compositor {
+  push(node: Node<NodeType>): void,
+  pop(): Node<NodeType> | undefined,
+  delete(treeid: TreeID): Node<NodeType> | undefined,
+  insert(node: Node<NodeType>, index: number | null): void,
+  move(treeid: TreeID, index: number, oldindex: number): void,
+  get(index: number): Node<NodeType> | undefined,
+}
 
-export class Compositor {
+export class FractosCompositor implements Compositor {
   private children: TreeID[] = []
   private nodes: Map<TreeID, Node<NodeType>> = new Map();
   
@@ -85,7 +93,12 @@ export class Compositor {
     this.updateChildrenIndex((index > oldindex) ? oldindex : index);
   }
   
-  get(index: number) { return this.children[index] }
+  get(index: number): Node<NodeType> | undefined {
+    const treeid = this.children[index]
+    if (!treeid) return;
+    
+    return this.nodes.get(treeid)
+  }
   
   private updateChildrenIndex(init: number = 0) {
     for (let index = init; index < this.children.length; index++) {
