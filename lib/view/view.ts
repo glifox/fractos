@@ -199,6 +199,7 @@ export class FractosView {
         else this.__parent.removeChild(node_.element);
         
         this.nodes.delete(node_.treeid);
+        this.children.splice(item.oldIndex, 1);
         
         if (this.mode.type === 'selected') this.setMode({ type: 'none' });
         if (this.mode.type === 'all') this.updateChildrenIndex(item.oldIndex);
