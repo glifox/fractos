@@ -125,7 +125,9 @@ export class FractosState {
     
     const node = this.getNodeByID(data.id);
     
-    for (const key of Object.keys(defaults)) {
+    const defaults_ = defaults[data.type];
+    
+    for (const key of Object.keys(defaults_)) {
       // @ts-ignore
       let value = data[key];
       if (value == null || value == undefined) continue;
