@@ -220,6 +220,7 @@ export class FractosView {
           continue;
         }
         
+        // todo: Move between parents
         
         continue;
       }
