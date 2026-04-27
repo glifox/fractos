@@ -37,8 +37,14 @@ export class FractosView {
   private _mode: ViewModeHandlers = {
     all: (_: ShowAll) => this.state.projects(this._renderProject.bind(this)),
     selected: (mode: Selected) => {
-      const project = this.state.getFractosNodeByID(mode.project, "project");
-      this._renderProject(project);
+      this.state.projects((node) => {
+        if (
+          node.treeid == mode.project &&
+          this.nodes.has(node.treeid)
+        ) this.compositor.push(this.nodes.get(node.treeid)!);
+        else if (node.treeid == mode.project) this._renderProject(node);
+        else this.compositor.delete(node.treeid)
+      })
     },
     none: (_: None) => {},
   }
