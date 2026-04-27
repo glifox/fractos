@@ -159,10 +159,11 @@ export class FractosView {
         const node_ = this.nodes.get(item.target);
         if (!node_) continue
         
-        if (parent_) parent_.compositor.delete(node_.treeid);
+        this.nodes.delete(node_.treeid);
+        
+        if (parent_) if (parent_.showChildren) parent_.compositor.delete(node_.treeid);
         else this.compositor.delete(node_.treeid);
         
-        this.nodes.delete(node_.treeid);
         
         if (this.mode.type === 'selected') this.setMode({ type: 'none' });
         
@@ -183,7 +184,7 @@ export class FractosView {
           continue;
         }
         
-        const node_ = oldParent_?.compositor.delete(item.target);
+        const node_ = (oldParent_?.showChildren) ? oldParent_?.compositor.delete(item.target) : undefined;
         
         if (
           node_ &&
