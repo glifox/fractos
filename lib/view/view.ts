@@ -35,13 +35,23 @@ export class FractosView {
   }
   
   private _mode: ViewModeHandlers = {
-    all: (_: ShowAll) => this.state.projects(this._renderProject.bind(this)),
+    all: (_: ShowAll) => {
+      this.state.projects((project) => {
+        let node_ = this.nodes.get(project.treeid);
+        if (!node_) {
+          this._renderProject(project);
+          return 
+        }
+        
+        this.compositor.insert(node_, project.index ?? null)
+      })
+    },
     selected: (mode: Selected) => {
       this.state.projects((node) => {
         if (
           node.treeid == mode.project &&
           this.nodes.has(node.treeid)
-        ) this.compositor.push(this.nodes.get(node.treeid)!);
+        ) this.compositor.insert(this.nodes.get(node.treeid)!, node.index ?? null);
         else if (node.treeid == mode.project) this._renderProject(node);
         else this.compositor.delete(node.treeid)
       })
@@ -63,7 +73,7 @@ export class FractosView {
     const project_ = this.renderer.project(this, node);
     
     this.nodes.set(node.treeid, project_);
-    this.compositor.push(project_);
+    this.compositor.insert(project_, node.index ?? null);
     
     if (project_.showChildren) this._renderChildren(project_)
   }
@@ -83,7 +93,7 @@ export class FractosView {
     
     this.nodes.set(node.treeid, node_);
     
-    parent.compositor.push(node_);
+    parent.compositor.insert(node_, node.index ?? null);
     if (node_.showChildren) this._renderChildren(node_);
   }
   
