@@ -7,6 +7,22 @@
   "license": "MIT",
   "main": "dist/fractos.js",
   "types": "dist/fractos.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glifox/fractos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/glifox/fractos/issues"
+  },
+  "homepage": "https://fractos.feraxhp.com/",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "tasks",
+    "projects"
+  ],
   "dependencies": {
     "loro-crdt": "^1.10.6"
   },
@@ -30,5 +46,8 @@
     "build": "rm -fr dist && rolldown -c",
     "build:watch": "rm -fr dist && rolldown -cw",
     "build:prod": "rm -fr dist && NODE_ENV=production rolldown -c"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
