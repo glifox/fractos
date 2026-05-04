@@ -3,6 +3,8 @@ import type { Node } from "./view.types";
 import type { NodeType } from "../state/node";
 
 export interface Compositor {
+  parent: HTMLElement;
+  
   pop(): Node<NodeType> | undefined,
   delete(treeid: TreeID): Node<NodeType> | undefined,
   insert(node: Node<NodeType>, index: number | null): void,
@@ -13,7 +15,8 @@ export interface Compositor {
 export class FractosCompositor implements Compositor {
   private children: TreeID[] = []
   private nodes: Map<TreeID, Node<NodeType>> = new Map();
-  
+
+  get parent() { return this.element };
   constructor(private element: HTMLElement) {}
   
   private push(node: Node<NodeType>) {

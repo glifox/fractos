@@ -194,4 +194,10 @@ export class FractosState {
   subscribe(callback: (event: LoroEventBatch) => void): Subscription {
     return this.root.subscribe(callback)
   }
+
+  onimport(callback: (event: LoroEventBatch) => void): Subscription {
+    return this.doc.subscribe((event) => {
+      if (event.by == 'import') callback(event)
+    })
+  }
 }

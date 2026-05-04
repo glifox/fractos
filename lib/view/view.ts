@@ -32,10 +32,11 @@ export class FractosView {
     this._render();
     
     this.state.subscribe(this._handleEvents.bind(this));
+    this.state.onimport(() => { this.setMode({ type: 'all' }) });
   }
   
   private _mode: ViewModeHandlers = {
-    all: (_: ShowAll) => {
+    all: (mode: ShowAll) => {
       this.state.projects((project) => {
         let node_ = this.nodes.get(project.treeid);
         if (!node_) {
@@ -45,6 +46,7 @@ export class FractosView {
         
         this.compositor.insert(node_, project.index ?? null)
       })
+      this._onModeChanged(mode);
     },
     selected: (mode: Selected) => {
       this.state.projects((node) => {
@@ -55,13 +57,22 @@ export class FractosView {
         else if (node.treeid == mode.project) this._renderProject(node);
         else this.compositor.delete(node.treeid)
       })
+      this._onModeChanged(mode);
     },
-    none: (_: None) => {},
+    none: (mode: None) => {
+      this._onModeChanged(mode);
+    },
   }
   
   setMode(mode: ViewMode) {
+    if (mode.type == this.mode.type) return;
     this.mode = mode;
     this._render();
+  }
+
+  private _onModeChanged(mode: ViewMode)  {
+    const event = new CustomEvent('fractos:view:mode', { detail: mode });
+    this.compositor.parent.dispatchEvent(event)
   }
   
   // @ts-ignore
