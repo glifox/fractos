@@ -7,6 +7,7 @@ import type { Renderer, Node, ViewModeHandlers, ViewMode, ShowAll, Selected, Non
 
 export class FractosView {
   state: FractosState;
+  
   private mode: ViewMode;
   private renderer: Renderer;
   private nodes: Map<TreeID, Node<NodeType>> = new Map();
@@ -65,7 +66,6 @@ export class FractosView {
   }
   
   setMode(mode: ViewMode) {
-    if (mode.type == this.mode.type) return;
     this.mode = mode;
     this._render();
   }
