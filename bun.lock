@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "fractos",
+      "dependencies": {
+        "loro-crdt": "^1.10.6",
+      },
       "devDependencies": {
         "@catppuccin/codemirror": "^1.0.3",
         "@codemirror/lang-json": "^6.0.2",
@@ -11,7 +14,6 @@
         "@glifox/gnosis": "^0.0.19",
         "@types/bun": "latest",
         "codemirror": "^6.0.2",
-        "loro-crdt": "^1.10.6",
         "rolldown": "^1.0.0-rc.9",
         "rolldown-plugin-dts": "^0.22.5",
         "uuid": "^13.0.0",
