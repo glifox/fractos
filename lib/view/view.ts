@@ -196,7 +196,9 @@ export class FractosView {
         const oldParent_ = item.oldParent ? this.nodes.get(item.oldParent) : undefined;
         
         if (parent_ && item.parent === item.oldParent) {
-          parent_.compositor.move(item.target, item.index, item.oldIndex);
+          if (parent_.showChildren) {
+            parent_.compositor.move(item.target, item.index, item.oldIndex);
+          }
           continue;
         }
         
