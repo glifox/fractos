@@ -2,21 +2,30 @@ import type { TreeID } from "loro-crdt";
 import type { Node } from "./view.types";
 import type { NodeType } from "../state/node";
 
+type Action = 'insert' | 'delete' | 'move';
+type OnChange = (action: Action) => void;
+
 export interface Compositor {
   parent: HTMLElement;
+  length: number;
   
   pop(): Node<NodeType> | undefined,
   delete(treeid: TreeID): Node<NodeType> | undefined,
   insert(node: Node<NodeType>, index: number | null): void,
   move(treeid: TreeID, index: number, oldindex: number): void,
   get(index: number): Node<NodeType> | undefined,
+
+  addChangeListener(callback: OnChange): () => boolean
 }
 
 export class FractosCompositor implements Compositor {
   private children: TreeID[] = []
   private nodes: Map<TreeID, Node<NodeType>> = new Map();
+  private listeners: Set<OnChange> = new Set();
 
   get parent() { return this.element };
+  get length() { return this.children.length }
+  
   constructor(private element: HTMLElement) {}
   
   private push(node: Node<NodeType>) {
@@ -26,6 +35,7 @@ export class FractosCompositor implements Compositor {
     this.element.appendChild(node.element);
     this.nodes.set(treeid, node);
     this.children.push(treeid);
+    this.listeners.forEach(listener => listener('insert'))
   }
   
   pop(): Node<NodeType> | undefined {
@@ -36,6 +46,7 @@ export class FractosCompositor implements Compositor {
     this.nodes.delete(treeid);
     
     this.element.removeChild(node_.element);
+    this.listeners.forEach(listener => listener('delete'))
     return node_
   }
 
@@ -54,6 +65,7 @@ export class FractosCompositor implements Compositor {
     this.nodes.delete(treeid);
     
     this.updateChildrenIndex(index);
+    this.listeners.forEach(listener => listener('delete'))
     return node_
   }
   
@@ -72,6 +84,7 @@ export class FractosCompositor implements Compositor {
     this.element.insertBefore(node.element, reference?.element ?? null);
     
     this.updateChildrenIndex(index);
+    this.listeners.forEach(listener => listener('insert'))
   }
   
   
@@ -93,6 +106,8 @@ export class FractosCompositor implements Compositor {
     this.children.splice(index, 0, element);
     
     this.updateChildrenIndex((index > oldindex) ? oldindex : index);
+
+    this.listeners.forEach(listener => listener('move'))
   }
   
   get(index: number): Node<NodeType> | undefined {
@@ -100,6 +115,11 @@ export class FractosCompositor implements Compositor {
     if (!treeid) return;
     
     return this.nodes.get(treeid)
+  }
+
+  addChangeListener(callback: OnChange): () => boolean {
+    this.listeners.add(callback)
+    return () => this.listeners.delete(callback);
   }
   
   private updateChildrenIndex(init: number = 0) {
