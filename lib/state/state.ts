@@ -200,6 +200,7 @@ export class FractosState {
   private __copy(node: Target, parent: Target, commit: boolean) {
     const from = FractosNode.from(this.nodeFromTarget(node));
     const metadata = from.metadata;
+    this.assert(metadata.type !== "project", `A project node can not be copied as a task`)
     
     const parent_ = this.nodeFromTarget(parent);
     
