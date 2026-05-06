@@ -78,5 +78,9 @@ export class FractosNode {
   
   get treeid(): TreeID { return this.node.id }
   get index() { return this.node.index() }
+  get hasChildren(): boolean {
+    const children = this.node.children();
+    return (children !== undefined && children.length > 0)
+  }
 }
 

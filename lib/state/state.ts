@@ -2,9 +2,9 @@ import type { LoroDoc, LoroEventBatch, LoroTree, LoroTreeNode, Subscription, Tre
 import { defaults, FractosNode, nodeTypes, type FractosNodeData, type ParcialFractosNodeData, type NodeType, type ProjectData, type TaskData } from "./node";
 
 
-type Type = NodeType;
+type Type = NodeType | 'action';
 
-const actions = ["create", "move", "update", "delete"] as const;
+const actions = ["create", "move", "update", "delete", "copy"] as const;
 type Action = typeof actions[number];
 
 type Target = { node: LoroTreeNode } | { id: TreeID };
@@ -150,6 +150,7 @@ export class FractosState {
   }
   
   private percentage(node: LoroTreeNode): number { return (node.data.get("percentage") || 0) as number }
+  /** Internal: Tigger recalculation of the percentage for the node and its parents, without triggering commits */
   private __reCalculatePercentage(parent: LoroTreeNode) {
     const children = parent.children() || [];
     const last = this.percentage(parent);
@@ -167,7 +168,8 @@ export class FractosState {
     const _parent = parent.parent();
     if (_parent) this.__reCalculatePercentage(_parent)
   }
-  
+
+  /** Tigger recalculation of the percentage for the node and its parents */
   reCalculatePercentage(id: TreeID) {
     const parent = this.getNodeByID(id);
     const type = parent.parent() ? "task" : "project";
@@ -189,6 +191,29 @@ export class FractosState {
       .map((node) => {
         return callback(FractosNode.from(node))
       })
+  }
+  
+  /** Copies the exact structure of a task and its suntask to a certant parent */
+  copy(node: Target, parent: Target) { this.__copy(node, parent, true) }
+  
+  /** Internal: Copies the exact structure of a task and its suntask to a certant parent, with and option to trigger a commit or not */
+  private __copy(node: Target, parent: Target, commit: boolean) {
+    const from = FractosNode.from(this.nodeFromTarget(node));
+    const metadata = from.metadata;
+    
+    const parent_ = this.nodeFromTarget(parent);
+    
+    const copyTarget = parent_.createNode();
+    FractosNode.populate(copyTarget, metadata);
+    
+    for (let child of from.node.children() ?? []) {
+      this.__copy({ node: child }, { node: copyTarget }, false)
+    }
+    
+    if (commit) {
+      this.__reCalculatePercentage(parent_)
+      this.commit('copy', 'action', `Copied ${from.get('title')} to ${parent_.data.get('title')}`)
+    }
   }
   
   subscribe(callback: (event: LoroEventBatch) => void): Subscription {
