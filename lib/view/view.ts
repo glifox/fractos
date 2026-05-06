@@ -116,8 +116,6 @@ export class FractosView {
   }
   
   private _handleEvents(events: LoroEventBatch) {
-    if (!events?.origin?.startsWith("fractos")) return;
-    if (events.by === "checkout") return;
     
     window.requestAnimationFrame(() => {
       for (const event of this.dedupe(events)) {
