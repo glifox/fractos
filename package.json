@@ -30,10 +30,10 @@
     "@catppuccin/codemirror": "^1.0.3",
     "@codemirror/lang-json": "^6.0.2",
     "rolldown-plugin-dts": "^0.22.5",
-    "@codemirror/state": "^6.6.0",
-    "@glifox/gnosis": "^0.0.19",
+    "@codemirror/state": "6.5.4",
+    "@glifox/gnosis": "0.0.19",
     "rolldown": "^1.0.0-rc.18",
-    "codemirror": "^6.0.2",
+    "codemirror": "6.0.2",
     "@types/bun": "latest",
     "uuid": "^13.0.2"
   },

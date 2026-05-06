@@ -23,16 +23,16 @@ const logger = log(doc.toJSON());
 
 const pr = state.create({
   type: "project",
-  title: "this is not a project",
-  description: "Just kidding, it is",
+  title: "master project",
+  description: "Simple description",
 })
 
 logger.change(doc.toJSON());
 
-state.create({
+const tk1 = state.create({
   type: "task",
-  title: "llamar a jesus",
-  description: "Si señor",
+  title: "Task 1",
+  description: "",
   percentage: 20,
   parent: pr,
 })
@@ -41,8 +41,8 @@ logger.change(doc.toJSON());
 
 const tsk = state.create({
   type: "task", 
-  title: "otra tarea",
-  description: "Si señor",
+  title: "Task 2",
+  description: "",
   percentage: 0,
   parent: pr,
 })
@@ -52,9 +52,37 @@ logger.change(doc.toJSON());
 state.create({
   type: "task",
   parent: tsk,
-  title: "",
+  title: "Subtask 1",
   description: "",
   percentage: 12
 })
 
-logger.change({ update: "percentage", ...doc.toJSON()});
+const st1 = state.create({
+  type: "task",
+  parent: tsk,
+  title: "Subtask 2",
+  description: "",
+  percentage: 12
+})
+
+state.create({
+  type: "task",
+  parent: tsk,
+  title: "Subtask 3",
+  description: "",
+  percentage: 12
+})
+
+state.create({
+  type: "task",
+  parent: st1,
+  title: "Sub Subtask 1",
+  description: "",
+  percentage: 12
+})
+
+logger.change({ update: "percentage", ...doc.toJSON() });
+
+state.copy({ id: tsk }, { id: tk1 })
+
+logger.change({ action: "copy", ...doc.toJSON() });
